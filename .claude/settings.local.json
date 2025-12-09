@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd CLAUDE.md and initial project structure\n\nSet up React/React Native client library for Heavymath Indexer API with:\n- Three-layer architecture (network, business, hooks)\n- Full TypeScript support with strict mode\n- React Query integration for data fetching\n- All 15 REST API endpoints covered\n- Comprehensive CLAUDE.md for AI-assisted coding workflows\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npm install:*)",
+      "Bash(npm run check-all:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

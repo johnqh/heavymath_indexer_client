@@ -4,13 +4,13 @@ TypeScript client library for the Heavymath Prediction Market Indexer API. Provi
 
 ## Features
 
-- 🎯 **Full API Coverage** - All 15 REST endpoints supported
-- ⚛️ **React Hooks** - Built-in hooks using @tanstack/react-query
-- 💼 **Business Services** - High-level services with caching
-- 🔄 **Network Layer** - Low-level HTTP client for custom integrations
-- 📦 **Zero Dependencies** - Network layer has no runtime dependencies
-- 🎨 **TypeScript First** - Full type definitions included
-- 📱 **React Native Compatible** - Works in React Native environments
+- **Full API Coverage** - All REST endpoints supported
+- **React Hooks** - Built-in hooks using @tanstack/react-query
+- **Business Services** - High-level services with caching
+- **Network Layer** - Low-level API client for custom integrations
+- **TypeScript First** - Full type definitions included
+- **React Native Compatible** - Works in React Native environments
+- **Dependency Injection** - Uses NetworkClient from @sudobility/di
 
 ## Installation
 
@@ -20,9 +20,8 @@ npm install @heavymath/indexer_client
 
 ## Peer Dependencies
 
-For React hooks:
 ```bash
-npm install react @tanstack/react-query
+npm install react @tanstack/react-query @sudobility/types @sudobility/heavymath_types @sudobility/di
 ```
 
 ## Quick Start
@@ -43,33 +42,45 @@ function App() {
 }
 ```
 
-### 2. Use Hooks in Your Components
+### 2. Create IndexerClient with NetworkClient
+
+```tsx
+import { useMemo } from 'react';
+import { useNetworkService } from '@sudobility/di'; // Or your DI container
+import { IndexerClient } from '@heavymath/indexer_client';
+
+// Create a hook to provide IndexerClient
+function useIndexerClient() {
+  const networkClient = useNetworkService();
+  return useMemo(
+    () => new IndexerClient('http://localhost:42069', networkClient),
+    [networkClient]
+  );
+}
+```
+
+### 3. Use Hooks in Your Components
 
 ```tsx
 import { useActiveMarkets, useUserPredictions } from '@heavymath/indexer_client';
 
 function BettorDashboard({ wallet }: { wallet: string }) {
-  const { data: markets, isLoading: marketsLoading } = useActiveMarkets(
-    'http://localhost:42069',
-    20
-  );
+  const client = useIndexerClient();
 
-  const { data: myBets, isLoading: betsLoading } = useUserPredictions(
-    'http://localhost:42069',
-    wallet
-  );
+  const { data: markets, isLoading: marketsLoading } = useActiveMarkets(client, 20);
+  const { data: myBets, isLoading: betsLoading } = useUserPredictions(client, wallet);
 
   if (marketsLoading || betsLoading) return <div>Loading...</div>;
 
   return (
     <div>
       <h2>Active Markets</h2>
-      {markets?.data.map(market => (
+      {markets?.data?.map(market => (
         <MarketCard key={market.id} market={market} />
       ))}
 
       <h2>My Bets</h2>
-      {myBets?.data.map(bet => (
+      {myBets?.data?.map(bet => (
         <BetCard key={bet.id} bet={bet} />
       ))}
     </div>
@@ -83,15 +94,16 @@ The library is organized into three layers:
 
 ### 1. Network Layer
 
-Low-level HTTP client and API endpoint methods.
+Low-level API client that accepts a `NetworkClient` instance.
 
 ```tsx
-import { IndexerClient, FetchNetworkClient } from '@heavymath/indexer_client';
+import type { NetworkClient } from '@sudobility/types';
+import { IndexerClient } from '@heavymath/indexer_client';
 
-const client = new IndexerClient(
-  'http://localhost:42069',
-  new FetchNetworkClient()
-);
+// Get NetworkClient from your DI container
+const networkClient: NetworkClient = getNetworkService();
+
+const client = new IndexerClient('http://localhost:42069', networkClient);
 
 // Direct API calls
 const markets = await client.getMarkets({ status: 'Active', limit: 10 });
@@ -103,10 +115,14 @@ const market = await client.getMarket('1-market-123');
 High-level services with caching and business logic.
 
 ```tsx
+import type { NetworkClient } from '@sudobility/types';
 import { IndexerService } from '@heavymath/indexer_client';
 
-const service = IndexerService.getInstance({
+const networkClient: NetworkClient = getNetworkService();
+
+const service = new IndexerService({
   indexerUrl: 'http://localhost:42069',
+  networkClient,
   cacheTTL: 5 * 60 * 1000, // 5 minutes (optional)
 });
 
@@ -121,17 +137,10 @@ const dealerDashboard = await service.getDealerDashboard('0x123...');
 React hooks using @tanstack/react-query for data fetching.
 
 ```tsx
-import {
-  useActiveMarkets,
-  useUserPredictions,
-  useDealerDashboard,
-} from '@heavymath/indexer_client';
+import { useActiveMarkets, useUserPredictions, useDealerDashboard } from '@heavymath/indexer_client';
 
-// React hooks with automatic caching and refetching
-const { data, isLoading, error, refetch } = useActiveMarkets(
-  'http://localhost:42069',
-  20
-);
+// All hooks take IndexerClient as first parameter
+const { data, isLoading, error, refetch } = useActiveMarkets(client, 20);
 ```
 
 ## Common Use Cases
@@ -142,15 +151,10 @@ const { data, isLoading, error, refetch } = useActiveMarkets(
 import { useDealerDashboard, useIsDealer } from '@heavymath/indexer_client';
 
 function DealerDashboard({ wallet }: { wallet: string }) {
-  const { data: isDealer, isLoading: checkingDealer } = useIsDealer(
-    'http://localhost:42069',
-    wallet
-  );
+  const client = useIndexerClient();
 
-  const { nfts, markets, isLoading } = useDealerDashboard(
-    'http://localhost:42069',
-    wallet
-  );
+  const { data: isDealer, isLoading: checkingDealer } = useIsDealer(client, wallet);
+  const { nfts, markets, isLoading } = useDealerDashboard(client, wallet);
 
   if (checkingDealer) return <div>Checking dealer status...</div>;
   if (!isDealer) return <div>You are not a dealer</div>;
@@ -178,10 +182,9 @@ function DealerDashboard({ wallet }: { wallet: string }) {
 import { useMarketDetails } from '@heavymath/indexer_client';
 
 function MarketPage({ marketId }: { marketId: string }) {
-  const { market, predictions, history, isLoading, isError } = useMarketDetails(
-    'http://localhost:42069',
-    marketId
-  );
+  const client = useIndexerClient();
+
+  const { market, predictions, history, isLoading, isError } = useMarketDetails(client, marketId);
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error loading market</div>;
@@ -210,53 +213,44 @@ function MarketPage({ marketId }: { marketId: string }) {
 }
 ```
 
-### User Betting History
+### Wallet Favorites
 
 ```tsx
-import { useUserBettingHistory } from '@heavymath/indexer_client';
+import { useFavorites } from '@heavymath/indexer_client';
 
-function BettingHistory({ wallet }: { wallet: string }) {
-  const { active, claimed, isLoading } = useUserBettingHistory(
-    'http://localhost:42069',
+function FavoritesPage({ wallet }: { wallet: string }) {
+  const client = useIndexerClient();
+
+  const { favorites, isLoading, addFavorite, removeFavorite, refresh } = useFavorites(
+    client,
     wallet
   );
+
+  const handleAddFavorite = async () => {
+    await addFavorite.mutateAsync({
+      category: 'sports',
+      subcategory: 'soccer',
+      type: 'team',
+      id: 'team-123',
+    });
+  };
+
+  const handleRemoveFavorite = async (id: number) => {
+    await removeFavorite.mutateAsync(id);
+  };
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      <h2>Active Bets ({active.data?.data.length || 0})</h2>
-      {active.data?.data.map(bet => (
-        <BetCard key={bet.id} bet={bet} status="active" />
+      <h2>My Favorites</h2>
+      {favorites.map(fav => (
+        <div key={fav.id}>
+          {fav.category}/{fav.subcategory}: {fav.itemId}
+          <button onClick={() => handleRemoveFavorite(fav.id)}>Remove</button>
+        </div>
       ))}
-
-      <h2>Past Bets ({claimed.data?.data.length || 0})</h2>
-      {claimed.data?.data.map(bet => (
-        <BetCard key={bet.id} bet={bet} status="claimed" />
-      ))}
-    </div>
-  );
-}
-```
-
-### Market Statistics
-
-```tsx
-import { useMarketStats } from '@heavymath/indexer_client';
-
-function StatsPage() {
-  const { data, isLoading } = useMarketStats('http://localhost:42069');
-
-  if (isLoading) return <div>Loading stats...</div>;
-
-  const stats = data?.data;
-  return (
-    <div>
-      <h2>Platform Statistics</h2>
-      <div>Total Markets: {stats?.totalMarkets}</div>
-      <div>Active Markets: {stats?.activeMarkets}</div>
-      <div>Resolved Markets: {stats?.resolvedMarkets}</div>
-      <div>Total Volume: {stats?.totalVolume}</div>
+      <button onClick={handleAddFavorite}>Add Favorite</button>
     </div>
   );
 }
@@ -265,56 +259,62 @@ function StatsPage() {
 ## Available Hooks
 
 ### Market Hooks
-- `useMarkets(url, filters?)` - Get all markets with filtering
-- `useActiveMarkets(url, limit?)` - Get active markets only
-- `useMarket(url, marketId)` - Get specific market
-- `useMarketPredictions(url, marketId)` - Get market's predictions
-- `useMarketHistory(url, marketId)` - Get market's state history
-- `useMarketDetails(url, marketId)` - Get complete market details
+- `useMarkets(client, filters?)` - Get all markets with filtering
+- `useActiveMarkets(client, limit?)` - Get active markets only
+- `useMarket(client, marketId)` - Get specific market
+- `useMarketPredictions(client, marketId)` - Get market's predictions
+- `useMarketHistory(client, marketId)` - Get market's state history
+- `useMarketDetails(client, marketId)` - Get complete market details
 
 ### Prediction Hooks
-- `usePredictions(url, filters?)` - Get predictions with filtering
-- `useUserPredictions(url, wallet, filters?)` - Get user's predictions
-- `useActiveBets(url, wallet)` - Get user's active bets
-- `usePastBets(url, wallet)` - Get user's claimed bets
-- `usePrediction(url, predictionId)` - Get specific prediction
-- `useUserBettingHistory(url, wallet)` - Get complete betting history
+- `usePredictions(client, filters?)` - Get predictions with filtering
+- `useUserPredictions(client, wallet, filters?)` - Get user's predictions
+- `useActiveBets(client, wallet)` - Get user's active bets
+- `usePastBets(client, wallet)` - Get user's claimed bets
+- `usePrediction(client, predictionId)` - Get specific prediction
+- `useUserBettingHistory(client, wallet)` - Get complete betting history
 
 ### Dealer Hooks
-- `useDealers(url, filters?)` - Get dealer NFTs with filtering
-- `useIsDealer(url, wallet)` - Check if wallet is a dealer
-- `useDealerNFTs(url, wallet)` - Get wallet's dealer NFTs
-- `useDealer(url, dealerId)` - Get specific dealer NFT
-- `useDealerPermissions(url, dealerId)` - Get dealer's permissions
-- `useDealerMarkets(url, dealerId)` - Get dealer's markets
-- `useDealerDashboard(url, wallet)` - Get complete dealer dashboard
+- `useDealers(client, filters?)` - Get dealer NFTs with filtering
+- `useIsDealer(client, wallet)` - Check if wallet is a dealer
+- `useDealerNFTs(client, wallet)` - Get wallet's dealer NFTs
+- `useDealer(client, dealerId)` - Get specific dealer NFT
+- `useDealerPermissions(client, dealerId)` - Get dealer's permissions
+- `useDealerMarkets(client, dealerId)` - Get dealer's markets
+- `useDealerDashboard(client, wallet)` - Get complete dealer dashboard
 
 ### Withdrawal Hooks
-- `useWithdrawals(url, filters?)` - Get withdrawals with filtering
-- `useDealerWithdrawals(url, dealer)` - Get dealer's withdrawals
-- `useSystemWithdrawals(url)` - Get system withdrawals
-- `useMarketWithdrawals(url, marketId)` - Get market's withdrawals
+- `useWithdrawals(client, filters?)` - Get withdrawals with filtering
+- `useDealerWithdrawals(client, dealer)` - Get dealer's withdrawals
+- `useSystemWithdrawals(client)` - Get system withdrawals
+- `useMarketWithdrawals(client, marketId)` - Get market's withdrawals
 
 ### Oracle Hooks
-- `useOracleRequests(url, filters?)` - Get oracle requests with filtering
-- `useOracleRequest(url, requestId)` - Get specific oracle request
-- `useMarketOracle(url, marketId)` - Get market's oracle request
-- `useTimedOutOracleRequests(url)` - Get timed out requests
-- `usePendingOracleRequests(url)` - Get pending requests
+- `useOracleRequests(client, filters?)` - Get oracle requests with filtering
+- `useOracleRequest(client, requestId)` - Get specific oracle request
+- `useMarketOracle(client, marketId)` - Get market's oracle request
+- `useTimedOutOracleRequests(client)` - Get timed out requests
+- `usePendingOracleRequests(client)` - Get pending requests
+
+### Favorites Hooks
+- `useFavorites(client, wallet, filters?)` - Get favorites with add/remove/refresh
+- `useCategoryFavorites(client, wallet, category)` - Get favorites by category
+- `useIsFavorite(client, wallet, item)` - Check if item is favorited with toggle
 
 ### Stats Hooks
-- `useMarketStats(url)` - Get market statistics
-- `useHealth(url)` - Get indexer health status
+- `useMarketStats(client)` - Get market statistics
+- `useHealth(client)` - Get indexer health status
 
 ## API Endpoints
 
-The client supports all 15 REST endpoints:
+The client supports all REST endpoints:
 
 - **Markets**: `/api/markets`, `/api/markets/:id`, `/api/markets/:id/predictions`, `/api/markets/:id/history`
 - **Predictions**: `/api/predictions`, `/api/predictions/:id`
 - **Dealers**: `/api/dealers`, `/api/dealers/:id`, `/api/dealers/:id/permissions`, `/api/dealers/:id/markets`
 - **Withdrawals**: `/api/withdrawals`
 - **Oracle**: `/api/oracle/requests`, `/api/oracle/requests/:id`
+- **Favorites**: `/api/wallet/:address/favorites` (GET, POST, DELETE)
 - **Analytics**: `/api/stats/markets`, `/api/health`
 
 ## TypeScript Support
@@ -323,16 +323,31 @@ Full TypeScript definitions included:
 
 ```tsx
 import type {
-  Market,
-  Prediction,
-  DealerNFT,
-  DealerPermission,
-  StateHistory,
-  FeeWithdrawal,
-  OracleRequest,
-  MarketStats,
+  // Core types (from @sudobility/heavymath_types)
+  MarketData,
+  PredictionData,
+  DealerNftData,
+  DealerPermissionData,
+  MarketStateHistoryData,
+  FeeWithdrawalData,
+  OracleRequestData,
+  WalletFavoriteData,
+  CreateFavoriteRequest,
+  // Enums
+  MarketStatus,
+  ClaimType,
+  WithdrawalType,
+  // Response wrappers (from @sudobility/types)
   ApiResponse,
   PaginatedResponse,
+  NetworkClient,
+  // Filter types
+  MarketFilters,
+  PredictionFilters,
+  DealerFilters,
+  WithdrawalFilters,
+  OracleFilters,
+  WalletFavoritesFilters,
 } from '@heavymath/indexer_client';
 ```
 

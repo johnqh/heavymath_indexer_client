@@ -3,8 +3,8 @@
  * Provides high-level methods with caching for frequently accessed data
  */
 
+import type { NetworkClient } from '@sudobility/types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 import type {
   Market,
   Prediction,
@@ -21,6 +21,7 @@ import type {
  */
 export interface IndexerServiceConfig {
   indexerUrl: string;
+  networkClient: NetworkClient;
   cacheTTL?: number; // Cache time-to-live in milliseconds (default: 5 minutes)
 }
 
@@ -31,15 +32,21 @@ export interface IndexerServiceConfig {
 export class IndexerService {
   private static instance: IndexerService;
   private indexerClient: IndexerClient;
-  private cache = new Map<string, { data: any; expires: number }>();
+  private cache = new Map<string, { data: unknown; expires: number }>();
   private readonly CACHE_TTL: number;
 
+  /**
+   * Create an IndexerService instance
+   * @param config - Configuration including indexerUrl and networkClient from @sudobility/di
+   */
   constructor(config: IndexerServiceConfig) {
     if (!config.indexerUrl) {
       throw new Error('indexerUrl is required in IndexerServiceConfig');
     }
-    const fetchClient = new FetchNetworkClient();
-    this.indexerClient = new IndexerClient(config.indexerUrl, fetchClient);
+    if (!config.networkClient) {
+      throw new Error('networkClient is required in IndexerServiceConfig');
+    }
+    this.indexerClient = new IndexerClient(config.indexerUrl, config.networkClient);
     this.CACHE_TTL = config.cacheTTL || 5 * 60 * 1000; // 5 minutes default
   }
 
@@ -54,7 +61,7 @@ export class IndexerService {
   // PRIVATE CACHE METHODS
   // =============================================================================
 
-  private getCacheKey(...args: any[]): string {
+  private getCacheKey(...args: unknown[]): string {
     return args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(':');
   }
 
@@ -144,7 +151,7 @@ export class IndexerService {
         owner: walletAddress,
       });
 
-      const nfts = result.data;
+      const nfts = result.data ?? [];
       this.setCache(cacheKey, nfts);
       return nfts;
     } catch (error) {

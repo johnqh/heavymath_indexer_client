@@ -3,11 +3,9 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { OracleRequest, PaginatedResponse, ApiResponse, OracleFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get oracle requests with optional filtering
@@ -15,22 +13,14 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useOracleRequests(
- *   'http://localhost:42069',
- *   { market: '1-market-123' }
- * );
+ * const { data, isLoading } = useOracleRequests(client, { market: '1-market-123' });
  * ```
  */
 export function useOracleRequests(
-  endpointUrl: string,
+  client: IndexerClient,
   filters?: OracleFilters,
   options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<OracleRequest>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'oracle-requests', filters],
     queryFn: async () => {
@@ -48,22 +38,14 @@ export function useOracleRequests(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useOracleRequest(
- *   'http://localhost:42069',
- *   '1-market-123-request-0'
- * );
+ * const { data, isLoading } = useOracleRequest(client, '1-market-123-request-0');
  * ```
  */
 export function useOracleRequest(
-  endpointUrl: string,
+  client: IndexerClient,
   requestId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<OracleRequest>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'oracle-request', requestId],
     queryFn: async () => {
@@ -83,19 +65,16 @@ export function useOracleRequest(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketOracle(
- *   'http://localhost:42069',
- *   '1-market-123'
- * );
+ * const { data, isLoading } = useMarketOracle(client, '1-market-123');
  * ```
  */
 export function useMarketOracle(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined,
   options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<OracleRequest>> {
   return useOracleRequests(
-    endpointUrl,
+    client,
     {
       market: marketId,
     },
@@ -112,15 +91,15 @@ export function useMarketOracle(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useTimedOutOracleRequests('http://localhost:42069');
+ * const { data, isLoading } = useTimedOutOracleRequests(client);
  * ```
  */
 export function useTimedOutOracleRequests(
-  endpointUrl: string,
+  client: IndexerClient,
   options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<OracleRequest>> {
   return useOracleRequests(
-    endpointUrl,
+    client,
     {
       timedOut: true,
     },
@@ -134,15 +113,15 @@ export function useTimedOutOracleRequests(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = usePendingOracleRequests('http://localhost:42069');
+ * const { data, isLoading } = usePendingOracleRequests(client);
  * ```
  */
 export function usePendingOracleRequests(
-  endpointUrl: string,
+  client: IndexerClient,
   options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<OracleRequest>> {
   return useOracleRequests(
-    endpointUrl,
+    client,
     {
       timedOut: false,
     },

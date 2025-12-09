@@ -3,7 +3,6 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
   DealerNFT,
@@ -14,7 +13,6 @@ import type {
   DealerFilters,
 } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get all dealer NFTs with optional filtering
@@ -22,22 +20,14 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useDealers(
- *   'http://localhost:42069',
- *   { owner: '0x123...' }
- * );
+ * const { data, isLoading } = useDealers(client, { owner: '0x123...' });
  * ```
  */
 export function useDealers(
-  endpointUrl: string,
+  client: IndexerClient,
   filters?: DealerFilters,
   options?: Omit<UseQueryOptions<PaginatedResponse<DealerNFT>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<DealerNFT>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'dealers', filters],
     queryFn: async () => {
@@ -55,28 +45,20 @@ export function useDealers(
  *
  * @example
  * ```tsx
- * const { data: isDealer, isLoading } = useIsDealer(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { data: isDealer, isLoading } = useIsDealer(client, '0x123...');
  * ```
  */
 export function useIsDealer(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined,
   options?: Omit<UseQueryOptions<boolean>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<boolean> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'is-dealer', walletAddress],
     queryFn: async () => {
       if (!walletAddress) return false;
       const result = await client.getDealers({ owner: walletAddress });
-      return result.data.length > 0;
+      return (result.data?.length ?? 0) > 0;
     },
     enabled: !!walletAddress,
     staleTime: 5 * 60 * 1000,
@@ -91,28 +73,20 @@ export function useIsDealer(
  *
  * @example
  * ```tsx
- * const { data: nfts, isLoading } = useDealerNFTs(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { data: nfts, isLoading } = useDealerNFTs(client, '0x123...');
  * ```
  */
 export function useDealerNFTs(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined,
   options?: Omit<UseQueryOptions<DealerNFT[]>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<DealerNFT[]> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'dealer-nfts', walletAddress],
     queryFn: async () => {
       if (!walletAddress) return [];
       const result = await client.getDealers({ owner: walletAddress });
-      return result.data;
+      return result.data ?? [];
     },
     enabled: !!walletAddress,
     staleTime: 5 * 60 * 1000,
@@ -127,19 +101,14 @@ export function useDealerNFTs(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useDealer('http://localhost:42069', '1-1');
+ * const { data, isLoading } = useDealer(client, '1-1');
  * ```
  */
 export function useDealer(
-  endpointUrl: string,
+  client: IndexerClient,
   dealerId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<DealerNFT>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<DealerNFT>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'dealer', dealerId],
     queryFn: async () => {
@@ -159,19 +128,14 @@ export function useDealer(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useDealerPermissions('http://localhost:42069', '1-1');
+ * const { data, isLoading } = useDealerPermissions(client, '1-1');
  * ```
  */
 export function useDealerPermissions(
-  endpointUrl: string,
+  client: IndexerClient,
   dealerId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<DealerPermission[]>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<DealerPermission[]>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'dealer-permissions', dealerId],
     queryFn: async () => {
@@ -191,19 +155,14 @@ export function useDealerPermissions(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useDealerMarkets('http://localhost:42069', '1-1');
+ * const { data, isLoading } = useDealerMarkets(client, '1-1');
  * ```
  */
 export function useDealerMarkets(
-  endpointUrl: string,
+  client: IndexerClient,
   dealerId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<Market[]>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<Market[]>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'dealer-markets', dealerId],
     queryFn: async () => {
@@ -223,14 +182,11 @@ export function useDealerMarkets(
  *
  * @example
  * ```tsx
- * const { nfts, markets, isLoading } = useDealerDashboard(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { nfts, markets, isLoading } = useDealerDashboard(client, '0x123...');
  * ```
  */
 export function useDealerDashboard(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined
 ): {
   nfts: UseQueryResult<DealerNFT[]>;
@@ -238,12 +194,7 @@ export function useDealerDashboard(
   isLoading: boolean;
   isError: boolean;
 } {
-  const nfts = useDealerNFTs(endpointUrl, walletAddress);
-
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
+  const nfts = useDealerNFTs(client, walletAddress);
 
   const markets = useQuery({
     queryKey: ['heavymath', 'dealer-dashboard-markets', walletAddress],

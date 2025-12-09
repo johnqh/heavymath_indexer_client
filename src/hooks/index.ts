@@ -19,3 +19,9 @@ export * from './useOracle';
 
 // Analytics and stats hooks
 export * from './useStats';
+
+// Favorites hooks
+export * from './useFavorites';
+
+// Real-time SSE hooks
+export * from './useSSE';

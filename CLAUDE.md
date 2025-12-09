@@ -38,11 +38,10 @@ npm run build        # Build output
 heavymath_indexer_client/
 ├── src/
 │   ├── index.ts                 # Main export (re-exports all modules)
-│   ├── types.ts                 # All type definitions
+│   ├── types.ts                 # Type re-exports from shared packages
 │   ├── network/                 # Network layer (low-level HTTP)
 │   │   ├── index.ts             # Network exports
-│   │   ├── FetchNetworkClient.ts # Generic HTTP client using fetch
-│   │   └── IndexerClient.ts     # API client with all 15 endpoints
+│   │   └── IndexerClient.ts     # API client with all endpoints
 │   ├── business/                # Business layer (high-level with caching)
 │   │   ├── index.ts             # Business exports
 │   │   └── indexer-service.ts   # IndexerService singleton with caching
@@ -53,7 +52,9 @@ heavymath_indexer_client/
 │   │   ├── useDealers.ts        # Dealer NFT hooks
 │   │   ├── useWithdrawals.ts    # Fee withdrawal hooks
 │   │   ├── useOracle.ts         # Oracle request hooks
-│   │   └── useStats.ts          # Statistics hooks
+│   │   ├── useStats.ts          # Statistics hooks
+│   │   ├── useFavorites.ts      # Wallet favorites hooks
+│   │   └── useSSE.ts            # Server-Sent Events hooks
 │   └── __tests__/               # Test files
 │       └── index.test.ts        # Smoke tests
 ├── package.json                 # Dependencies and scripts
@@ -67,7 +68,7 @@ heavymath_indexer_client/
 ### Navigation Tips
 
 - **Adding new hook**: Create in `src/hooks/`, export from `src/hooks/index.ts`
-- **Adding new type**: Add to `src/types.ts`
+- **Adding new type**: Types come from `@sudobility/heavymath_types` - update that package first
 - **Adding API endpoint**: Add to `src/network/IndexerClient.ts`
 - **Adding business method**: Add to `src/business/indexer-service.ts`
 - **Writing tests**: Add to `src/__tests__/`
@@ -81,6 +82,7 @@ heavymath_indexer_client/
 │                   React Hooks                        │
 │  (useMarkets, usePredictions, useDealers, etc.)     │
 │  Uses @tanstack/react-query for caching             │
+│  Receives IndexerClient as parameter                │
 └─────────────────────────────────────────────────────┘
                           │
                           ▼
@@ -88,13 +90,15 @@ heavymath_indexer_client/
 │                  Business Layer                      │
 │  (IndexerService)                                    │
 │  High-level methods with TTL caching                 │
+│  Requires NetworkClient from @sudobility/di          │
 └─────────────────────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────┐
 │                   Network Layer                      │
-│  (IndexerClient + FetchNetworkClient)                │
+│  (IndexerClient + NetworkClient)                     │
 │  Low-level HTTP requests, 1:1 with REST endpoints   │
+│  NetworkClient injected from @sudobility/di          │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -103,9 +107,30 @@ heavymath_indexer_client/
 - **Business Layer**: Non-React code needing caching
 - **Network Layer**: Direct API access, custom implementations
 
+### Dependency Injection
+
+The library uses `NetworkClient` from `@sudobility/types` for HTTP requests. Consumers must provide a `NetworkClient` instance (typically from `@sudobility/di`):
+
+```typescript
+import { NetworkClient } from '@sudobility/types';
+import { IndexerClient, IndexerService } from '@heavymath/indexer_client';
+
+// Get NetworkClient from your DI container
+const networkClient: NetworkClient = getNetworkService();
+
+// Create IndexerClient
+const client = new IndexerClient('http://localhost:42069', networkClient);
+
+// Or create IndexerService
+const service = new IndexerService({
+  indexerUrl: 'http://localhost:42069',
+  networkClient,
+});
+```
+
 ### Indexer API Endpoints
 
-The client covers all 15 REST endpoints from `heavymath_indexer`:
+The client covers all REST endpoints from `heavymath_indexer`:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -122,6 +147,9 @@ The client covers all 15 REST endpoints from `heavymath_indexer`:
 | `/api/withdrawals` | GET | List fee withdrawals |
 | `/api/oracle/requests` | GET | List oracle requests |
 | `/api/oracle/requests/:id` | GET | Get oracle request by ID |
+| `/api/wallet/:address/favorites` | GET | Get wallet favorites |
+| `/api/wallet/:address/favorites` | POST | Add favorite |
+| `/api/wallet/:address/favorites/:id` | DELETE | Remove favorite |
 | `/api/stats/markets` | GET | Get market statistics |
 | `/api/health` | GET | Health check |
 
@@ -137,22 +165,15 @@ The client covers all 15 REST endpoints from `heavymath_indexer`:
 **Pattern to follow:**
 ```typescript
 // src/hooks/useExample.ts
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { SomeType, ApiResponse } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 export function useExample(
-  endpointUrl: string,
+  client: IndexerClient,
   param: string,
   options?: Omit<UseQueryOptions<ApiResponse<SomeType>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<SomeType>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'example', param],
     queryFn: async () => {
@@ -170,7 +191,7 @@ export function useExample(
 ### 2. Adding a New API Endpoint
 
 **Steps:**
-1. Add types to `src/types.ts` if needed
+1. Add types to `@sudobility/heavymath_types` if needed
 2. Add method to `src/network/IndexerClient.ts`
 3. Optionally add business method to `src/business/indexer-service.ts`
 4. Create hook in `src/hooks/`
@@ -214,51 +235,30 @@ public async getNewData(param: string): Promise<NewType[]> {
 }
 ```
 
-### 4. Adding a New Type
-
-Add to `src/types.ts`:
-```typescript
-/**
- * Description of the new type
- */
-export interface NewType {
-  id: string;
-  chainId: number;
-  someField: string;
-  numericField: string; // BigInt as string
-  createdAt: string;    // ISO date string
-}
-
-/**
- * Query parameters for new endpoint
- */
-export interface NewTypeFilters {
-  someFilter?: string;
-  limit?: number;
-  offset?: number;
-}
-```
-
 ## Type Conventions
 
-### Response Types
-- `ApiResponse<T>` - Single item response with `success`, `data`, `error`
-- `PaginatedResponse<T>` - List response with `data[]`, `count`, `limit`, `offset`
+### Shared Types
 
-### Field Conventions
-- **IDs**: Chain-prefixed strings (e.g., `"1-market-123"`)
-- **Addresses**: Lowercase hex strings (e.g., `"0xabc..."`)
-- **BigInt values**: Stored as strings (e.g., `"1000000000000000000"`)
-- **Dates**: ISO 8601 strings (e.g., `"2024-01-15T12:00:00Z"`)
-- **Enums**: String literals (e.g., `MarketStatus = 'Active' | 'Resolved' | ...`)
+Types are re-exported from `@sudobility/heavymath_types` and `@sudobility/types`:
 
-### Filter Types
-Each endpoint has a corresponding filter interface:
+- **From `@sudobility/types`**: `ApiResponse`, `PaginatedResponse`, `NetworkClient`, `NetworkResponse`, `Optional`
+- **From `@sudobility/heavymath_types`**: `MarketData`, `PredictionData`, `DealerNftData`, `MarketStatus`, etc.
+
+### Backward Compatibility Aliases
+
+For backward compatibility, these aliases are available (but deprecated):
+- `Market` → `MarketData`
+- `Prediction` → `PredictionData`
+- `DealerNFT` → `DealerNftData`
+- `StateHistory` → `MarketStateHistoryData`
+
+### Filter Types (defined locally)
 - `MarketFilters` - status, dealer, category, limit, offset
 - `PredictionFilters` - user, market, claimed, limit, offset
 - `DealerFilters` - owner, limit, offset
 - `WithdrawalFilters` - withdrawer, type, market, limit, offset
 - `OracleFilters` - market, timedOut, limit, offset
+- `WalletFavoritesFilters` - category, subcategory, type, limit, offset
 
 ## Code Patterns to Follow
 
@@ -267,7 +267,7 @@ Always use hierarchical keys with `'heavymath'` prefix:
 ```typescript
 queryKey: ['heavymath', 'markets', filters]
 queryKey: ['heavymath', 'market', marketId]
-queryKey: ['heavymath', 'user-predictions', wallet, filters]
+queryKey: ['heavymath', 'favorites', walletAddress, filters]
 ```
 
 ### Stale Time Guidelines
@@ -319,12 +319,23 @@ npm run test:coverage # With coverage
 
 ### Test Pattern
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { IndexerClient, FetchNetworkClient } from '../index';
+import { describe, it, expect, vi } from 'vitest';
+import type { NetworkClient } from '@sudobility/types';
+import { IndexerClient, IndexerService } from '../index';
+
+// Mock NetworkClient for testing
+const createMockNetworkClient = (): NetworkClient => ({
+  request: vi.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+});
 
 describe('FeatureName', () => {
   it('should do something', () => {
-    const client = new IndexerClient('http://localhost:42069');
+    const mockNetworkClient = createMockNetworkClient();
+    const client = new IndexerClient('http://localhost:42069', mockNetworkClient);
     expect(client).toBeInstanceOf(IndexerClient);
   });
 });
@@ -335,6 +346,8 @@ describe('FeatureName', () => {
 ### Peer Dependencies (required by consumer)
 - `react` ^19.2.0
 - `@tanstack/react-query` ^5.90.5
+- `@sudobility/types` - Provides NetworkClient, ApiResponse, etc.
+- `@sudobility/heavymath_types` - Provides domain types
 
 ### Runtime Dependencies
 - None (zero dependencies for network layer)
@@ -350,39 +363,31 @@ describe('FeatureName', () => {
 - Add JSDoc comments to exported functions
 - Use TypeScript strict mode (enabled)
 - Follow the three-layer architecture
-- Use `useMemo` for client instances in hooks
+- Pass `IndexerClient` as first parameter to hooks
 - Run `npm run check-all` before committing
 
 ### Don'ts
 - Don't use `any` type (prefer `unknown` and type guards)
 - Don't skip the `enabled` option in hooks when param might be undefined
-- Don't hardcode URLs in hooks (always pass `endpointUrl`)
-- Don't create clients outside `useMemo` in hooks
+- Don't create NetworkClient instances in this library - let consumers inject them
 - Don't forget to export from layer index files
+- Don't define types locally if they exist in shared packages
 
-## Related Project
+## Related Projects
 
-This client library connects to the **Heavymath Indexer** (`~/heavymath_indexer`):
-- GraphQL API: `http://localhost:42069/graphql`
-- REST API: `http://localhost:42069/api/*`
-- Default port: 42069
+- **@sudobility/types**: Base types and NetworkClient interface
+- **@sudobility/heavymath_types**: Domain-specific types (Market, Prediction, etc.)
+- **@sudobility/di**: Dependency injection and NetworkClient implementations
+- **heavymath_indexer**: The backend API this client connects to
 
 ## Quick Reference
 
 ### Common Hook Signatures
 ```typescript
-// Basic list with filters
-useMarkets(endpointUrl: string, filters?: MarketFilters)
-
-// Single item by ID
-useMarket(endpointUrl: string, marketId: string | undefined)
-
-// User-specific data
-useUserPredictions(endpointUrl: string, wallet: string, filters?)
-
-// Composite hook returning multiple queries
-useMarketDetails(endpointUrl: string, marketId: string | undefined)
-// Returns: { market, predictions, history, isLoading, isError }
+// All hooks take IndexerClient as first parameter
+useMarkets(client: IndexerClient, filters?: MarketFilters)
+useMarket(client: IndexerClient, marketId: string | undefined)
+useFavorites(client: IndexerClient, walletAddress: string | undefined, filters?)
 ```
 
 ### Available Hooks by Category
@@ -402,6 +407,9 @@ useWithdrawals, useDealerWithdrawals, useSystemWithdrawals, useMarketWithdrawals
 // Oracle
 useOracleRequests, useOracleRequest, useMarketOracle, useTimedOutOracleRequests, usePendingOracleRequests
 
+// Favorites
+useFavorites, useCategoryFavorites, useIsFavorite
+
 // Stats
 useMarketStats, useHealth
 ```
@@ -409,16 +417,17 @@ useMarketStats, useHealth
 ### Type Imports
 ```typescript
 import type {
-  // Core types
-  Market, Prediction, DealerNFT, DealerPermission, StateHistory, FeeWithdrawal, OracleRequest,
-  // Response wrappers
-  ApiResponse, PaginatedResponse, NetworkResponse,
-  // Filter types
-  MarketFilters, PredictionFilters, DealerFilters, WithdrawalFilters, OracleFilters,
+  // Core types (from @sudobility/heavymath_types)
+  MarketData, PredictionData, DealerNftData, DealerPermissionData,
+  MarketStateHistoryData, FeeWithdrawalData, OracleRequestData,
+  WalletFavoriteData, CreateFavoriteRequest,
   // Enums
-  MarketStatus,
-  // Stats
-  MarketStats, HealthStatus,
+  MarketStatus, ClaimType, WithdrawalType,
+  // Response wrappers (from @sudobility/types)
+  ApiResponse, PaginatedResponse, NetworkClient, NetworkResponse,
+  // Filter types (local)
+  MarketFilters, PredictionFilters, DealerFilters, WithdrawalFilters, OracleFilters,
+  WalletFavoritesFilters,
 } from '@heavymath/indexer_client';
 ```
 

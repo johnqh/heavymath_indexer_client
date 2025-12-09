@@ -3,7 +3,6 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
   Market,
@@ -14,7 +13,6 @@ import type {
   MarketFilters,
 } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get all markets with optional filtering
@@ -23,21 +21,16 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  * @example
  * ```tsx
  * const { data, isLoading, error } = useMarkets(
- *   'http://localhost:42069',
+ *   client,
  *   { status: 'Active', limit: 10 }
  * );
  * ```
  */
 export function useMarkets(
-  endpointUrl: string,
+  client: IndexerClient,
   filters?: MarketFilters,
   options?: Omit<UseQueryOptions<PaginatedResponse<Market>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Market>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'markets', filters],
     queryFn: async () => {
@@ -55,16 +48,16 @@ export function useMarkets(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useActiveMarkets('http://localhost:42069', 20);
+ * const { data, isLoading } = useActiveMarkets(client, 20);
  * ```
  */
 export function useActiveMarkets(
-  endpointUrl: string,
+  client: IndexerClient,
   limit: number = 50,
   options?: Omit<UseQueryOptions<PaginatedResponse<Market>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Market>> {
   return useMarkets(
-    endpointUrl,
+    client,
     {
       status: 'Active',
       limit,
@@ -79,19 +72,14 @@ export function useActiveMarkets(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarket('http://localhost:42069', '1-market-123');
+ * const { data, isLoading } = useMarket(client, '1-market-123');
  * ```
  */
 export function useMarket(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<Market>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<Market>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'market', marketId],
     queryFn: async () => {
@@ -111,19 +99,14 @@ export function useMarket(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketPredictions('http://localhost:42069', '1-market-123');
+ * const { data, isLoading } = useMarketPredictions(client, '1-market-123');
  * ```
  */
 export function useMarketPredictions(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<Prediction[]>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<Prediction[]>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'market-predictions', marketId],
     queryFn: async () => {
@@ -143,19 +126,14 @@ export function useMarketPredictions(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketHistory('http://localhost:42069', '1-market-123');
+ * const { data, isLoading } = useMarketHistory(client, '1-market-123');
  * ```
  */
 export function useMarketHistory(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<StateHistory[]>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<StateHistory[]>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'market-history', marketId],
     queryFn: async () => {
@@ -175,14 +153,11 @@ export function useMarketHistory(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketDetails('http://localhost:42069', '1-market-123');
- * if (data) {
- *   // data.market, data.predictions, data.history
- * }
+ * const { market, predictions, history, isLoading } = useMarketDetails(client, '1-market-123');
  * ```
  */
 export function useMarketDetails(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined
 ): {
   market: UseQueryResult<ApiResponse<Market>>;
@@ -191,9 +166,9 @@ export function useMarketDetails(
   isLoading: boolean;
   isError: boolean;
 } {
-  const market = useMarket(endpointUrl, marketId);
-  const predictions = useMarketPredictions(endpointUrl, marketId);
-  const history = useMarketHistory(endpointUrl, marketId);
+  const market = useMarket(client, marketId);
+  const predictions = useMarketPredictions(client, marketId);
+  const history = useMarketHistory(client, marketId);
 
   return {
     market,

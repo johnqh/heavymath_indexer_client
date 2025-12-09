@@ -3,11 +3,9 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { FeeWithdrawal, PaginatedResponse, WithdrawalFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get fee withdrawals with optional filtering
@@ -16,21 +14,16 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  * @example
  * ```tsx
  * const { data, isLoading } = useWithdrawals(
- *   'http://localhost:42069',
+ *   client,
  *   { withdrawer: '0x123...', type: 'dealer' }
  * );
  * ```
  */
 export function useWithdrawals(
-  endpointUrl: string,
+  client: IndexerClient,
   filters?: WithdrawalFilters,
   options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'withdrawals', filters],
     queryFn: async () => {
@@ -48,19 +41,16 @@ export function useWithdrawals(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useDealerWithdrawals(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { data, isLoading } = useDealerWithdrawals(client, '0x123...');
  * ```
  */
 export function useDealerWithdrawals(
-  endpointUrl: string,
+  client: IndexerClient,
   dealerAddress: string | undefined,
   options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
   return useWithdrawals(
-    endpointUrl,
+    client,
     {
       withdrawer: dealerAddress,
       type: 'dealer',
@@ -78,15 +68,15 @@ export function useDealerWithdrawals(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useSystemWithdrawals('http://localhost:42069');
+ * const { data, isLoading } = useSystemWithdrawals(client);
  * ```
  */
 export function useSystemWithdrawals(
-  endpointUrl: string,
+  client: IndexerClient,
   options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
   return useWithdrawals(
-    endpointUrl,
+    client,
     {
       type: 'system',
     },
@@ -100,19 +90,16 @@ export function useSystemWithdrawals(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketWithdrawals(
- *   'http://localhost:42069',
- *   '1-market-123'
- * );
+ * const { data, isLoading } = useMarketWithdrawals(client, '1-market-123');
  * ```
  */
 export function useMarketWithdrawals(
-  endpointUrl: string,
+  client: IndexerClient,
   marketId: string | undefined,
   options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
   return useWithdrawals(
-    endpointUrl,
+    client,
     {
       market: marketId,
     },

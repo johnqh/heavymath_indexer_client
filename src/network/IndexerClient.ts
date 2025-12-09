@@ -1,3 +1,4 @@
+import type { NetworkClient, NetworkResponse } from '@sudobility/types';
 import type {
   ApiResponse,
   PaginatedResponse,
@@ -15,9 +16,10 @@ import type {
   DealerFilters,
   WithdrawalFilters,
   OracleFilters,
-  NetworkResponse,
+  WalletFavoriteData,
+  WalletFavoritesFilters,
+  CreateFavoriteRequest,
 } from '../types';
-import { FetchNetworkClient } from './FetchNetworkClient';
 
 /**
  * Build URL with base and path
@@ -31,22 +33,28 @@ function buildUrl(baseUrl: string, path: string): string {
 /**
  * Handle API errors
  */
-function handleApiError(response: NetworkResponse<any>, operation: string): Error {
-  const errorMessage = response.data?.error || response.statusText || `Failed to ${operation}`;
+function handleApiError(response: NetworkResponse<unknown>, operation: string): Error {
+  const data = response.data as { error?: string } | undefined;
+  const errorMessage = data?.error || response.statusText || `Failed to ${operation}`;
   return new Error(`API Error (${response.status}): ${errorMessage}`);
 }
 
 /**
  * Indexer API client for Heavymath Prediction Market
- * Provides methods for all 15 REST endpoints
+ * Provides methods for all REST endpoints
  */
 export class IndexerClient {
   private readonly baseUrl: string;
-  private readonly networkClient: FetchNetworkClient;
+  private readonly networkClient: NetworkClient;
 
-  constructor(endpointUrl: string, networkClient?: FetchNetworkClient) {
+  /**
+   * Create an IndexerClient instance
+   * @param endpointUrl - The base URL for the indexer API
+   * @param networkClient - A NetworkClient instance from @sudobility/di
+   */
+  constructor(endpointUrl: string, networkClient: NetworkClient) {
     this.baseUrl = endpointUrl;
-    this.networkClient = networkClient || new FetchNetworkClient();
+    this.networkClient = networkClient;
   }
 
   // =============================================================================
@@ -324,6 +332,79 @@ export class IndexerClient {
 
     if (!response.ok || !response.data) {
       throw handleApiError(response, 'get oracle request');
+    }
+
+    return response.data;
+  }
+
+  // =============================================================================
+  // WALLET FAVORITES ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get favorites for a wallet address
+   * GET /api/wallet/:address/favorites
+   */
+  async getFavorites(
+    walletAddress: string,
+    filters?: WalletFavoritesFilters
+  ): Promise<PaginatedResponse<WalletFavoriteData>> {
+    const params = new URLSearchParams();
+
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.subcategory) params.append('subcategory', filters.subcategory);
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.offset) params.append('offset', filters.offset.toString());
+
+    const queryString = params.toString();
+    const path = `/api/wallet/${encodeURIComponent(walletAddress)}/favorites${queryString ? `?${queryString}` : ''}`;
+
+    const response = await this.networkClient.get<PaginatedResponse<WalletFavoriteData>>(
+      buildUrl(this.baseUrl, path)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get favorites');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Add a favorite for a wallet address
+   * POST /api/wallet/:address/favorites
+   */
+  async addFavorite(
+    walletAddress: string,
+    favorite: CreateFavoriteRequest
+  ): Promise<ApiResponse<WalletFavoriteData>> {
+    const response = await this.networkClient.post<ApiResponse<WalletFavoriteData>>(
+      buildUrl(this.baseUrl, `/api/wallet/${encodeURIComponent(walletAddress)}/favorites`),
+      favorite
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'add favorite');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Remove a favorite by ID
+   * DELETE /api/wallet/:address/favorites/:id
+   */
+  async removeFavorite(walletAddress: string, favoriteId: number): Promise<ApiResponse<void>> {
+    const response = await this.networkClient.delete<ApiResponse<void>>(
+      buildUrl(
+        this.baseUrl,
+        `/api/wallet/${encodeURIComponent(walletAddress)}/favorites/${favoriteId}`
+      )
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'remove favorite');
     }
 
     return response.data;

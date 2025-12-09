@@ -3,11 +3,9 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { Prediction, PaginatedResponse, ApiResponse, PredictionFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get predictions with optional filtering
@@ -16,21 +14,16 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  * @example
  * ```tsx
  * const { data, isLoading } = usePredictions(
- *   'http://localhost:42069',
+ *   client,
  *   { user: '0x123...', claimed: false }
  * );
  * ```
  */
 export function usePredictions(
-  endpointUrl: string,
+  client: IndexerClient,
   filters?: PredictionFilters,
   options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Prediction>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'predictions', filters],
     queryFn: async () => {
@@ -48,20 +41,17 @@ export function usePredictions(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useUserPredictions(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { data, isLoading } = useUserPredictions(client, '0x123...');
  * ```
  */
 export function useUserPredictions(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined,
   filters?: Omit<PredictionFilters, 'user'>,
   options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Prediction>> {
   return usePredictions(
-    endpointUrl,
+    client,
     {
       user: walletAddress,
       ...filters,
@@ -78,16 +68,16 @@ export function useUserPredictions(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useActiveBets('http://localhost:42069', '0x123...');
+ * const { data, isLoading } = useActiveBets(client, '0x123...');
  * ```
  */
 export function useActiveBets(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined,
   options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Prediction>> {
   return useUserPredictions(
-    endpointUrl,
+    client,
     walletAddress,
     {
       claimed: false,
@@ -102,16 +92,16 @@ export function useActiveBets(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = usePastBets('http://localhost:42069', '0x123...');
+ * const { data, isLoading } = usePastBets(client, '0x123...');
  * ```
  */
 export function usePastBets(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined,
   options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<PaginatedResponse<Prediction>> {
   return useUserPredictions(
-    endpointUrl,
+    client,
     walletAddress,
     {
       claimed: true,
@@ -127,22 +117,14 @@ export function usePastBets(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = usePrediction(
- *   'http://localhost:42069',
- *   '1-market-123-0xuser...'
- * );
+ * const { data, isLoading } = usePrediction(client, '1-market-123-0xuser...');
  * ```
  */
 export function usePrediction(
-  endpointUrl: string,
+  client: IndexerClient,
   predictionId: string | undefined,
   options?: Omit<UseQueryOptions<ApiResponse<Prediction>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<Prediction>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'prediction', predictionId],
     queryFn: async () => {
@@ -162,14 +144,11 @@ export function usePrediction(
  *
  * @example
  * ```tsx
- * const { active, claimed, isLoading } = useUserBettingHistory(
- *   'http://localhost:42069',
- *   '0x123...'
- * );
+ * const { active, claimed, isLoading } = useUserBettingHistory(client, '0x123...');
  * ```
  */
 export function useUserBettingHistory(
-  endpointUrl: string,
+  client: IndexerClient,
   walletAddress: string | undefined
 ): {
   active: UseQueryResult<PaginatedResponse<Prediction>>;
@@ -177,8 +156,8 @@ export function useUserBettingHistory(
   isLoading: boolean;
   isError: boolean;
 } {
-  const active = useActiveBets(endpointUrl, walletAddress);
-  const claimed = usePastBets(endpointUrl, walletAddress);
+  const active = useActiveBets(client, walletAddress);
+  const claimed = usePastBets(client, walletAddress);
 
   return {
     active,

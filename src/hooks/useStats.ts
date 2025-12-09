@@ -3,11 +3,9 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useMemo } from 'react';
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { MarketStats, HealthStatus, ApiResponse } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
-import { FetchNetworkClient } from '../network/FetchNetworkClient';
 
 /**
  * Get market statistics
@@ -15,21 +13,16 @@ import { FetchNetworkClient } from '../network/FetchNetworkClient';
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useMarketStats('http://localhost:42069');
+ * const { data, isLoading } = useMarketStats(client);
  * if (data?.success) {
- *   // data.data.totalMarkets, data.data.activeMarkets, etc.
+ *   // data.data.total, data.data.byStatus, etc.
  * }
  * ```
  */
 export function useMarketStats(
-  endpointUrl: string,
+  client: IndexerClient,
   options?: Omit<UseQueryOptions<ApiResponse<MarketStats>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<MarketStats>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'market-stats'],
     queryFn: async () => {
@@ -47,21 +40,16 @@ export function useMarketStats(
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useHealth('http://localhost:42069');
+ * const { data, isLoading } = useHealth(client);
  * if (data?.success) {
- *   // data.data.status, data.data.database
+ *   // data.data.status, data.data.timestamp
  * }
  * ```
  */
 export function useHealth(
-  endpointUrl: string,
+  client: IndexerClient,
   options?: Omit<UseQueryOptions<ApiResponse<HealthStatus>>, 'queryKey' | 'queryFn'>
 ): UseQueryResult<ApiResponse<HealthStatus>> {
-  const client = useMemo(
-    () => new IndexerClient(endpointUrl, new FetchNetworkClient()),
-    [endpointUrl]
-  );
-
   return useQuery({
     queryKey: ['heavymath', 'health'],
     queryFn: async () => {

@@ -1,183 +1,115 @@
 /**
- * Type definitions for Heavymath Prediction Market Indexer API
+ * Type definitions for Heavymath Prediction Market Indexer API Client
+ *
+ * Re-exports types from @sudobility/heavymath_types and @sudobility/types
+ * to ensure type consistency between frontend and backend.
  */
 
-/**
- * Generic API response wrapper
- */
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  timestamp?: string;
-}
+// ============================================================================
+// Re-exports from @sudobility/types
+// ============================================================================
 
-/**
- * Paginated API response wrapper
- */
-export interface PaginatedResponse<T> {
-  success: boolean;
-  data: T[];
-  count: number;
-  limit: number;
-  offset: number;
-  error?: string;
-}
+export type {
+  // Base response types
+  BaseResponse,
+  PaginationInfo,
+  PaginatedResponse,
+  Optional,
+  // Network types
+  NetworkClient,
+  NetworkResponse,
+  NetworkRequestOptions,
+} from '@sudobility/types';
 
-/**
- * Market status
- */
-export type MarketStatus =
-  | 'Active'
-  | 'Locked'
-  | 'Resolved'
-  | 'Cancelled'
-  | 'Abandoned'
-  | 'Refunded';
+// ApiResponse is an alias for BaseResponse
+export type { ApiResponse } from '@sudobility/types';
 
-/**
- * Prediction Market
- */
-export interface Market {
-  id: string;
-  chainId: number;
-  marketId: string;
-  dealerNftTokenId: string;
-  dealerAddress: string;
-  title: string;
-  description: string | null;
-  category: string;
-  status: MarketStatus;
-  outcome: string | null;
-  createdAt: string;
-  resolvedAt: string | null;
-  blockNumber: string;
-  transactionHash: string;
-}
+// ============================================================================
+// Re-exports from @sudobility/heavymath_types
+// ============================================================================
 
-/**
- * User Prediction
- */
-export interface Prediction {
-  id: string;
-  chainId: number;
-  marketId: string;
-  userAddress: string;
-  amount: string;
-  percentage: number;
-  outcome: string;
-  hasClaimed: string;
-  claimedAmount: string | null;
-  createdAt: string;
-  updatedAt: string;
-  lastBlockNumber: string;
-  lastTransactionHash: string;
-}
+export type {
+  // Common types
+  ChainPrefixedId,
+  PredictionId,
+  TxLogId,
 
-/**
- * Dealer NFT
- */
-export interface DealerNFT {
-  id: string;
-  chainId: number;
-  tokenId: string;
-  ownerAddress: string;
-  mintedAt: string;
-  mintBlockNumber: string;
-  mintTransactionHash: string;
-  lastTransferAt: string | null;
-  lastTransferBlockNumber: string | null;
-  lastTransferTransactionHash: string | null;
-}
+  // Enums
+  MarketStatus,
+  ClaimType,
+  WithdrawalType,
 
-/**
- * Dealer Permission
- */
-export interface DealerPermission {
-  id: string;
-  chainId: number;
-  tokenId: string;
-  category: number;
-  subCategory: number;
-  grantedAt: string;
-  blockNumber: string;
-  transactionHash: string;
-}
+  // API Data types (JSON-serializable versions for API responses)
+  MarketData,
+  PredictionData,
+  DealerNftData,
+  DealerPermissionData,
+  FeeWithdrawalData,
+  OracleRequestData,
+  MarketStateHistoryData,
+  MarketStatsData,
+  HealthData,
+  SSEStatsData,
+  WalletFavoriteData,
+  CreateFavoriteRequest,
+  PaginationMeta,
+} from '@sudobility/heavymath_types';
 
-/**
- * Market State History
- */
-export interface StateHistory {
-  id: string;
-  chainId: number;
-  marketId: string;
-  fromState: MarketStatus;
-  toState: MarketStatus;
-  changedAt: string;
-  blockNumber: string;
-  transactionHash: string;
-  reason: string | null;
-}
+// ============================================================================
+// Type Aliases for Backward Compatibility
+// ============================================================================
 
-/**
- * Fee Withdrawal
- */
-export interface FeeWithdrawal {
-  id: string;
-  chainId: number;
-  marketId: string;
-  withdrawerAddress: string;
-  withdrawalType: 'dealer' | 'system';
-  amount: string;
-  withdrawnAt: string;
-  blockNumber: string;
-  transactionHash: string;
-}
+// These aliases map old type names to new ones from @sudobility/heavymath_types
+// This maintains backward compatibility with existing code using the old names
 
-/**
- * Oracle Request
- */
-export interface OracleRequest {
-  id: string;
-  chainId: number;
-  marketId: string;
-  requestId: string;
-  requestedAt: string;
-  requestBlockNumber: string;
-  requestTransactionHash: string;
-  timeout: string;
-  respondedAt: string | null;
-  responseBlockNumber: string | null;
-  responseTransactionHash: string | null;
-  isTimedOut: string;
-}
+import type {
+  MarketData,
+  PredictionData,
+  DealerNftData,
+  DealerPermissionData,
+  FeeWithdrawalData,
+  OracleRequestData,
+  MarketStateHistoryData,
+  MarketStatsData,
+  HealthData,
+} from '@sudobility/heavymath_types';
 
-/**
- * Market Statistics
- */
-export interface MarketStats {
-  totalMarkets: number;
-  activeMarkets: number;
-  resolvedMarkets: number;
-  totalPredictions: number;
-  totalVolume: string;
-  totalFees: string;
-}
+/** @deprecated Use MarketData instead */
+export type Market = MarketData;
 
-/**
- * Health Check Response
- */
-export interface HealthStatus {
-  status: string;
-  database: string;
-  timestamp: string;
-}
+/** @deprecated Use PredictionData instead */
+export type Prediction = PredictionData;
+
+/** @deprecated Use DealerNftData instead */
+export type DealerNFT = DealerNftData;
+
+/** @deprecated Use DealerPermissionData instead */
+export type DealerPermission = DealerPermissionData;
+
+/** @deprecated Use FeeWithdrawalData instead */
+export type FeeWithdrawal = FeeWithdrawalData;
+
+/** @deprecated Use OracleRequestData instead */
+export type OracleRequest = OracleRequestData;
+
+/** @deprecated Use MarketStateHistoryData instead */
+export type StateHistory = MarketStateHistoryData;
+
+/** @deprecated Use MarketStatsData instead */
+export type MarketStats = MarketStatsData;
+
+/** @deprecated Use HealthData instead */
+export type HealthStatus = HealthData;
+
+// ============================================================================
+// Client-specific Types (not in shared packages)
+// ============================================================================
 
 /**
  * Query parameters for markets endpoint
  */
 export interface MarketFilters {
-  status?: MarketStatus;
+  status?: import('@sudobility/heavymath_types').MarketStatus;
   dealer?: string;
   category?: string;
   limit?: number;
@@ -209,7 +141,7 @@ export interface DealerFilters {
  */
 export interface WithdrawalFilters {
   withdrawer?: string;
-  type?: 'dealer' | 'system';
+  type?: import('@sudobility/heavymath_types').WithdrawalType;
   market?: string;
   limit?: number;
   offset?: number;
@@ -226,19 +158,156 @@ export interface OracleFilters {
 }
 
 /**
- * Network response type
+ * Query parameters for wallet favorites endpoint
  */
-export interface NetworkResponse<T> {
-  ok: boolean;
-  status: number;
-  statusText: string;
-  data: T;
-  headers: Record<string, string>;
-  success: boolean;
-  timestamp: string;
+export interface WalletFavoritesFilters {
+  category?: string;
+  subcategory?: string;
+  type?: string;
+  limit?: number;
+  offset?: number;
+}
+
+// ============================================================================
+// Server-Sent Events (SSE) Types
+// ============================================================================
+
+/**
+ * SSE subscription channels
+ */
+export type SubscriptionChannel = 'markets' | 'market' | 'predictions' | 'dealers' | 'oracle';
+
+/**
+ * SSE event types
+ */
+export type SSEEventType =
+  | 'MarketCreated'
+  | 'MarketResolved'
+  | 'MarketCancelled'
+  | 'MarketAbandoned'
+  | 'PredictionPlaced'
+  | 'PredictionUpdated'
+  | 'WinningsClaimed'
+  | 'RefundClaimed'
+  | 'DealerFeeSet'
+  | 'DealerFeesWithdrawn'
+  | 'LicenseIssued'
+  | 'LicenseTransferred'
+  | 'PermissionsSet'
+  | 'OracleRegistered'
+  | 'OracleDataUpdated';
+
+/**
+ * SSE subscription filters
+ */
+export interface SSEFilters {
+  marketId?: string;
+  dealer?: string;
+  user?: string;
+  category?: string;
 }
 
 /**
- * Optional utility type
+ * SSE connection message
  */
-export type Optional<T> = T | null | undefined;
+export interface SSEConnectedMessage {
+  type: 'connected';
+  clientId: string;
+  subscriptionId: string;
+  channel: SubscriptionChannel;
+  timestamp: number;
+}
+
+/**
+ * SSE data update message
+ */
+export interface SSEDataUpdateMessage {
+  type: 'data_update';
+  subscriptionId: string;
+  eventType: SSEEventType;
+  data: unknown;
+  timestamp: number;
+}
+
+/**
+ * SSE heartbeat message
+ */
+export interface SSEHeartbeatMessage {
+  type: 'heartbeat';
+  timestamp: number;
+}
+
+/**
+ * SSE subscription confirmed message
+ */
+export interface SSESubscriptionConfirmedMessage {
+  type: 'subscription_confirmed';
+  subscriptionId: string;
+  channel: SubscriptionChannel;
+}
+
+/**
+ * Union of all SSE message types
+ */
+export type SSEMessage =
+  | SSEConnectedMessage
+  | SSEDataUpdateMessage
+  | SSEHeartbeatMessage
+  | SSESubscriptionConfirmedMessage;
+
+/**
+ * SSE connection state
+ */
+export type SSEConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
+
+/**
+ * Market created event data
+ */
+export interface MarketCreatedEventData {
+  marketId: string;
+  dealer: string;
+  category: string;
+  chainId: number;
+}
+
+/**
+ * Market resolved event data
+ */
+export interface MarketResolvedEventData {
+  marketId: string;
+  resolution: string;
+  equilibrium: string;
+  chainId: number;
+}
+
+/**
+ * Prediction placed event data
+ */
+export interface PredictionPlacedEventData {
+  marketId: string;
+  predictor: string;
+  amount: string;
+  percentage: string;
+  chainId: number;
+}
+
+/**
+ * Prediction updated event data
+ */
+export interface PredictionUpdatedEventData {
+  marketId: string;
+  predictor: string;
+  newAmount: string;
+  newPercentage: string;
+  chainId: number;
+}
+
+/**
+ * Winnings/refund claimed event data
+ */
+export interface ClaimEventData {
+  marketId: string;
+  predictor: string;
+  amount: string;
+  chainId: number;
+}
