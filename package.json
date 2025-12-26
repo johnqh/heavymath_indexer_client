@@ -1,6 +1,6 @@
 {
-  "name": "@heavymath/indexer_client",
-  "version": "0.0.2",
+  "name": "@sudobility/heavymath_indexer_client",
+  "version": "0.0.3",
   "description": "React and React Native compatible client library for Heavymath prediction market indexer API with TypeScript support",
   "type": "module",
   "main": "dist/index.js",
@@ -40,17 +40,16 @@
   "author": "John Huang",
   "license": "MIT",
   "peerDependencies": {
-    "@sudobility/heavymath_types": "*",
-    "@sudobility/types": "*",
+    "@sudobility/heavymath_types": "^0.0.1",
+    "@sudobility/types": "^1.9.31",
     "@tanstack/react-query": "^5.90.5",
     "react": "^19.2.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "@sudobility/heavymath_types": "*",
-    "@sudobility/types": "*",
+    "@sudobility/heavymath_types": "^0.0.1",
+    "@sudobility/types": "^1.9.31",
     "@tanstack/react-query": "^5.90.5",
-    "zustand": "^5.0.0",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
@@ -65,9 +64,11 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "happy-dom": "^20.0.8",
     "prettier": "^3.6.2",
+    "react": "^19.2.3",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "vitest": "^4.0.4"
+    "vitest": "^4.0.4",
+    "zustand": "^5.0.0"
   },
   "repository": {
     "type": "git",
