@@ -38,7 +38,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "inlineSourceMap": false,
-    "inlineSources": false,
+    "inlineSources": true,
 
     // React/JSX
     "jsx": "react"
