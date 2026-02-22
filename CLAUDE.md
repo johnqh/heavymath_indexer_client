@@ -7,29 +7,29 @@ This guide helps you work efficiently with Claude Code on the Heavymath Indexer 
 ### Essential Commands
 
 ```bash
-npm run build        # Compile TypeScript to dist/
-npm run typecheck    # Type validation (no emit)
-npm test             # Run tests in watch mode
-npm run test:run     # Run tests once
-npm run lint         # Check for linting errors
-npm run lint:fix     # Auto-fix linting issues
-npm run format       # Format code with Prettier
-npm run check-all    # Run lint + typecheck + tests (use before commits)
+bun run build        # Compile TypeScript to dist/
+bun run typecheck    # Type validation (no emit)
+bun test             # Run tests in watch mode
+bun run test:run     # Run tests once
+bun run lint         # Check for linting errors
+bun run lint:fix     # Auto-fix linting issues
+bun run format       # Format code with Prettier
+bun run check-all    # Run lint + typecheck + tests (use before commits)
 ```
 
 ### Validation Workflow
 
 Always run before committing:
 ```bash
-npm run check-all    # Combines lint, typecheck, and test:run
+bun run check-all    # Combines lint, typecheck, and test:run
 ```
 
 Or individually:
 ```bash
-npm run lint         # Linting
-npm run typecheck    # Type checking
-npm run test:run     # Tests
-npm run build        # Build output
+bun run lint         # Linting
+bun run typecheck    # Type checking
+bun run test:run     # Tests
+bun run build        # Build output
 ```
 
 ## Project Structure
@@ -312,9 +312,9 @@ const path = `/api/endpoint${queryString ? `?${queryString}` : ''}`;
 
 ### Running Tests
 ```bash
-npm test             # Watch mode
-npm run test:run     # Single run
-npm run test:coverage # With coverage
+bun test             # Watch mode
+bun run test:run     # Single run
+bun run test:coverage # With coverage
 ```
 
 ### Test Pattern
@@ -364,7 +364,7 @@ describe('FeatureName', () => {
 - Use TypeScript strict mode (enabled)
 - Follow the three-layer architecture
 - Pass `IndexerClient` as first parameter to hooks
-- Run `npm run check-all` before committing
+- Run `bun run check-all` before committing
 
 ### Don'ts
 - Don't use `any` type (prefer `unknown` and type guards)
@@ -433,4 +433,4 @@ import type {
 
 ---
 
-**Remember**: Always run `npm run check-all` before committing!
+**Remember**: Always run `bun run check-all` before committing!
