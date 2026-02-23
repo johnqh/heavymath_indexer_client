@@ -2,6 +2,17 @@
 
 This guide helps you work efficiently with Claude Code on the Heavymath Indexer Client library.
 
+## Project Overview
+
+React and React Native compatible client library for the Heavymath prediction market indexer API. Provides a four-layer architecture (hooks -> stores -> business -> network) with React Query integration, Zustand stores for optimistic updates, and SSE real-time subscriptions.
+
+- **Version**: 0.0.14
+- **Package**: `@sudobility/heavymath_indexer_client`
+- **License**: BUSL-1.1
+- **Stack**: TypeScript 5.9.3, React Query 5.90, Zustand 5, Vitest 4.0
+- **Package manager**: Bun (never npm/yarn/pnpm)
+- **Runtime dependencies**: None (zero runtime dependencies -- all peer deps)
+
 ## Quick Start
 
 ### Essential Commands
@@ -547,20 +558,29 @@ The project uses a reusable GitHub Actions workflow defined in `.github/workflow
 ### Peer Dependencies (required by consumer)
 - `react` >=18.0.0
 - `@tanstack/react-query` >=5.0.0
-- `@sudobility/types` ^1.9.51 - Provides `NetworkClient`, `ApiResponse`, etc.
-- `@sudobility/heavymath_types` ^0.0.7 - Provides domain types
+- `@sudobility/types` ^1.9.53 - Provides `NetworkClient`, `ApiResponse`, etc.
+- `@sudobility/heavymath_types` ^0.0.8 - Provides domain types
 - `zustand` ^5.0.0 - Used by favorites store for local persistence
 
 ### Runtime Dependencies
 - None (zero runtime dependencies)
 
 ### Dev Dependencies
-- TypeScript ^5.9.3, ESLint ^9.38.0, Prettier ^3.6.2, Vitest ^4.0.4
-- `@vitest/coverage-v8` ^4.0.4, `happy-dom` ^20.0.8
-- `@testing-library/react` ^16.3.0, `@testing-library/dom` ^10.4.1
-- `react` ^19.2.1, `react-dom` ^19.2.1 (for testing)
-- `zustand` ^5.0.0 (for testing)
-- `dotenv` ^17.2.3
+| Package | Version | Purpose |
+|---|---|---|
+| `typescript` | ^5.9.3 | TypeScript compiler |
+| `eslint` | ^9.38.0 | Linting |
+| `prettier` | ^3.6.2 | Code formatting |
+| `vitest` | ^4.0.4 | Test framework |
+| `@vitest/coverage-v8` | ^4.0.4 | Coverage reporting |
+| `happy-dom` | ^20.0.8 | DOM environment for tests |
+| `@testing-library/react` | ^16.3.0 | React testing utilities |
+| `@testing-library/dom` | ^10.4.1 | DOM testing utilities |
+| `react` | ^19.2.1 | React (dev/testing only) |
+| `react-dom` | ^19.2.1 | React DOM (dev/testing only) |
+| `zustand` | ^5.0.0 | Zustand (dev/testing only) |
+| `vite` | ^7.1.12 | Build tool (for Vitest) |
+| `dotenv` | ^17.2.3 | Environment variable loading |
 
 ## React Native Compatibility
 

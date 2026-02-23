@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Indexer API Client
+ * @description Low-level HTTP client for all Heavymath Indexer REST endpoints.
+ * Each public method maps 1:1 to a REST API endpoint. Uses an injected
+ * NetworkClient for transport, making it environment-agnostic (browser, Node, React Native).
+ */
+
 import type { NetworkClient, NetworkResponse } from '@sudobility/types';
 import type {
   ApiResponse,
@@ -22,7 +29,11 @@ import type {
 } from '../types';
 
 /**
- * Build URL with base and path
+ * Build a full URL by joining a base URL and path.
+ *
+ * @param baseUrl - The base URL (trailing slash is stripped)
+ * @param path - The path to append (leading slash is ensured)
+ * @returns The combined URL string
  */
 function buildUrl(baseUrl: string, path: string): string {
   const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -31,7 +42,11 @@ function buildUrl(baseUrl: string, path: string): string {
 }
 
 /**
- * Handle API errors
+ * Create a standardized Error from an API response failure.
+ *
+ * @param response - The failed network response
+ * @param operation - A description of the operation that failed (used in error message)
+ * @returns An Error with a formatted message including the HTTP status code
  */
 function handleApiError(response: NetworkResponse<unknown>, operation: string): Error {
   const data = response.data as { error?: string } | undefined;
@@ -40,8 +55,9 @@ function handleApiError(response: NetworkResponse<unknown>, operation: string): 
 }
 
 /**
- * Indexer API client for Heavymath Prediction Market
- * Provides methods for all REST endpoints
+ * Indexer API client for Heavymath Prediction Market.
+ * Provides type-safe methods for all REST endpoints exposed by the heavymath_indexer.
+ * Requires a `NetworkClient` instance (from `@sudobility/di`) for HTTP transport.
  */
 export class IndexerClient {
   private readonly baseUrl: string;
@@ -62,8 +78,12 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get all markets with optional filtering
+   * Get all markets with optional filtering.
    * GET /api/markets
+   *
+   * @param filters - Optional query parameters (status, dealer, category, limit, offset)
+   * @returns Paginated list of markets
+   * @throws Error if the API request fails
    */
   async getMarkets(filters?: MarketFilters): Promise<PaginatedResponse<Market>> {
     const params = new URLSearchParams();
@@ -89,8 +109,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get a specific market by ID
+   * Get a specific market by ID.
    * GET /api/markets/:id
+   *
+   * @param id - The chain-prefixed market ID (e.g., "1-market-123")
+   * @returns The market data wrapped in an API response
+   * @throws Error if the market is not found or the request fails
    */
   async getMarket(id: string): Promise<ApiResponse<Market>> {
     const response = await this.networkClient.get<ApiResponse<Market>>(
@@ -105,8 +129,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get all predictions for a specific market
+   * Get all predictions for a specific market.
    * GET /api/markets/:id/predictions
+   *
+   * @param marketId - The chain-prefixed market ID
+   * @returns Array of predictions for the market
+   * @throws Error if the request fails
    */
   async getMarketPredictions(marketId: string): Promise<ApiResponse<Prediction[]>> {
     const response = await this.networkClient.get<ApiResponse<Prediction[]>>(
@@ -121,8 +149,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get state transition history for a market
+   * Get state transition history for a market.
    * GET /api/markets/:id/history
+   *
+   * @param marketId - The chain-prefixed market ID
+   * @returns Array of state history entries for the market
+   * @throws Error if the request fails
    */
   async getMarketHistory(marketId: string): Promise<ApiResponse<StateHistory[]>> {
     const response = await this.networkClient.get<ApiResponse<StateHistory[]>>(
@@ -141,8 +173,12 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get predictions with optional filtering
+   * Get predictions with optional filtering.
    * GET /api/predictions
+   *
+   * @param filters - Optional query parameters (user, market, claimed, limit, offset)
+   * @returns Paginated list of predictions
+   * @throws Error if the request fails
    */
   async getPredictions(filters?: PredictionFilters): Promise<PaginatedResponse<Prediction>> {
     const params = new URLSearchParams();
@@ -168,8 +204,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get a specific prediction by ID
+   * Get a specific prediction by ID.
    * GET /api/predictions/:id
+   *
+   * @param id - The chain-prefixed prediction ID (e.g., "1-market-123-0xuser...")
+   * @returns The prediction data wrapped in an API response
+   * @throws Error if the prediction is not found or the request fails
    */
   async getPrediction(id: string): Promise<ApiResponse<Prediction>> {
     const response = await this.networkClient.get<ApiResponse<Prediction>>(
@@ -188,8 +228,12 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get all dealer NFTs with optional filtering
+   * Get all dealer NFTs with optional filtering.
    * GET /api/dealers
+   *
+   * @param filters - Optional query parameters (owner, limit, offset)
+   * @returns Paginated list of dealer NFTs
+   * @throws Error if the request fails
    */
   async getDealers(filters?: DealerFilters): Promise<PaginatedResponse<DealerNFT>> {
     const params = new URLSearchParams();
@@ -213,8 +257,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get a specific dealer NFT by ID
+   * Get a specific dealer NFT by ID.
    * GET /api/dealers/:id
+   *
+   * @param id - The chain-prefixed dealer ID (e.g., "1-1")
+   * @returns The dealer NFT data wrapped in an API response
+   * @throws Error if the dealer is not found or the request fails
    */
   async getDealer(id: string): Promise<ApiResponse<DealerNFT>> {
     const response = await this.networkClient.get<ApiResponse<DealerNFT>>(
@@ -229,8 +277,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get permissions for a specific dealer NFT
+   * Get permissions for a specific dealer NFT.
    * GET /api/dealers/:id/permissions
+   *
+   * @param dealerId - The chain-prefixed dealer ID
+   * @returns Array of permission entries for the dealer
+   * @throws Error if the request fails
    */
   async getDealerPermissions(dealerId: string): Promise<ApiResponse<DealerPermission[]>> {
     const response = await this.networkClient.get<ApiResponse<DealerPermission[]>>(
@@ -245,8 +297,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get all markets created by a specific dealer NFT
+   * Get all markets created by a specific dealer NFT.
    * GET /api/dealers/:id/markets
+   *
+   * @param dealerId - The chain-prefixed dealer ID
+   * @returns Array of markets created by this dealer
+   * @throws Error if the request fails
    */
   async getDealerMarkets(dealerId: string): Promise<ApiResponse<Market[]>> {
     const response = await this.networkClient.get<ApiResponse<Market[]>>(
@@ -265,8 +321,12 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get fee withdrawals with optional filtering
+   * Get fee withdrawals with optional filtering.
    * GET /api/withdrawals
+   *
+   * @param filters - Optional query parameters (withdrawer, type, market, limit, offset)
+   * @returns Paginated list of fee withdrawals
+   * @throws Error if the request fails
    */
   async getWithdrawals(filters?: WithdrawalFilters): Promise<PaginatedResponse<FeeWithdrawal>> {
     const params = new URLSearchParams();
@@ -296,8 +356,12 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get oracle requests with optional filtering
+   * Get oracle requests with optional filtering.
    * GET /api/oracle/requests
+   *
+   * @param filters - Optional query parameters (market, timedOut, limit, offset)
+   * @returns Paginated list of oracle requests
+   * @throws Error if the request fails
    */
   async getOracleRequests(filters?: OracleFilters): Promise<PaginatedResponse<OracleRequest>> {
     const params = new URLSearchParams();
@@ -322,8 +386,12 @@ export class IndexerClient {
   }
 
   /**
-   * Get a specific oracle request by ID
+   * Get a specific oracle request by ID.
    * GET /api/oracle/requests/:id
+   *
+   * @param id - The oracle request ID
+   * @returns The oracle request data wrapped in an API response
+   * @throws Error if the oracle request is not found or the request fails
    */
   async getOracleRequest(id: string): Promise<ApiResponse<OracleRequest>> {
     const response = await this.networkClient.get<ApiResponse<OracleRequest>>(
@@ -342,8 +410,13 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get favorites for a wallet address
+   * Get favorites for a wallet address.
    * GET /api/wallet/:address/favorites
+   *
+   * @param walletAddress - The wallet address to get favorites for
+   * @param filters - Optional query parameters (category, subcategory, type, limit, offset)
+   * @returns Paginated list of wallet favorites
+   * @throws Error if the request fails
    */
   async getFavorites(
     walletAddress: string,
@@ -372,8 +445,13 @@ export class IndexerClient {
   }
 
   /**
-   * Add a favorite for a wallet address
+   * Add a favorite for a wallet address.
    * POST /api/wallet/:address/favorites
+   *
+   * @param walletAddress - The wallet address to add a favorite for
+   * @param favorite - The favorite item to add (category, subcategory, type, id)
+   * @returns The newly created favorite data
+   * @throws Error if the request fails
    */
   async addFavorite(
     walletAddress: string,
@@ -392,8 +470,13 @@ export class IndexerClient {
   }
 
   /**
-   * Remove a favorite by ID
+   * Remove a favorite by ID.
    * DELETE /api/wallet/:address/favorites/:id
+   *
+   * @param walletAddress - The wallet address that owns the favorite
+   * @param favoriteId - The numeric ID of the favorite to remove
+   * @returns An API response confirming deletion
+   * @throws Error if the favorite is not found or the request fails
    */
   async removeFavorite(walletAddress: string, favoriteId: number): Promise<ApiResponse<void>> {
     const response = await this.networkClient.delete<ApiResponse<void>>(
@@ -415,8 +498,11 @@ export class IndexerClient {
   // =============================================================================
 
   /**
-   * Get market statistics
+   * Get market statistics.
    * GET /api/stats/markets
+   *
+   * @returns Aggregate market statistics (totals, breakdowns by status)
+   * @throws Error if the request fails
    */
   async getMarketStats(): Promise<ApiResponse<MarketStats>> {
     const response = await this.networkClient.get<ApiResponse<MarketStats>>(
@@ -431,8 +517,11 @@ export class IndexerClient {
   }
 
   /**
-   * Get health status
+   * Get health status of the indexer.
    * GET /api/health
+   *
+   * @returns The indexer health status
+   * @throws Error if the request fails
    */
   async getHealth(): Promise<ApiResponse<HealthStatus>> {
     const response = await this.networkClient.get<ApiResponse<HealthStatus>>(

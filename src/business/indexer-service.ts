@@ -86,8 +86,11 @@ export class IndexerService {
   // =============================================================================
 
   /**
-   * Get active markets with caching
-   * Commonly used for displaying available markets to bettors
+   * Get active markets with caching.
+   * Commonly used for displaying available markets to bettors.
+   *
+   * @param limit - Maximum number of markets to return (default: 50)
+   * @returns Paginated list of active markets
    */
   public async getActiveMarkets(limit: number = 50): Promise<PaginatedResponse<Market>> {
     const cacheKey = this.getCacheKey('active-markets', limit);
@@ -304,7 +307,9 @@ export class IndexerService {
   }
 
   /**
-   * Get market statistics with caching
+   * Get market statistics with caching.
+   *
+   * @returns Aggregate market statistics wrapped in an API response
    */
   public async getMarketStats(): Promise<ApiResponse<MarketStats>> {
     const cacheKey = this.getCacheKey('market-stats');
@@ -330,7 +335,9 @@ export class IndexerService {
   }
 
   /**
-   * Get the underlying IndexerClient for direct API access
+   * Get the underlying IndexerClient for direct API access.
+   *
+   * @returns The IndexerClient instance used by this service
    */
   public getClient(): IndexerClient {
     return this.indexerClient;
