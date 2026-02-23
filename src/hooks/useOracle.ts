@@ -4,7 +4,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { OracleRequest, PaginatedResponse, ApiResponse, OracleFilters } from '../types';
+import type { OracleRequestData, PaginatedResponse, ApiResponse, OracleFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -19,8 +19,8 @@ import { IndexerClient } from '../network/IndexerClient';
 export function useOracleRequests(
   client: IndexerClient,
   filters?: OracleFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<OracleRequest>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequestData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<OracleRequestData>> {
   return useQuery({
     queryKey: ['heavymath', 'oracle-requests', filters],
     queryFn: async () => {
@@ -44,8 +44,8 @@ export function useOracleRequests(
 export function useOracleRequest(
   client: IndexerClient,
   requestId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<OracleRequest>> {
+  options?: Omit<UseQueryOptions<ApiResponse<OracleRequestData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<OracleRequestData>> {
   return useQuery({
     queryKey: ['heavymath', 'oracle-request', requestId],
     queryFn: async () => {
@@ -71,8 +71,8 @@ export function useOracleRequest(
 export function useMarketOracle(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<OracleRequest>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequestData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<OracleRequestData>> {
   return useOracleRequests(
     client,
     {
@@ -96,8 +96,8 @@ export function useMarketOracle(
  */
 export function useTimedOutOracleRequests(
   client: IndexerClient,
-  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<OracleRequest>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequestData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<OracleRequestData>> {
   return useOracleRequests(
     client,
     {
@@ -118,8 +118,8 @@ export function useTimedOutOracleRequests(
  */
 export function usePendingOracleRequests(
   client: IndexerClient,
-  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequest>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<OracleRequest>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<OracleRequestData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<OracleRequestData>> {
   return useOracleRequests(
     client,
     {

@@ -5,9 +5,9 @@
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
-  Market,
-  Prediction,
-  StateHistory,
+  MarketData,
+  PredictionData,
+  MarketStateHistoryData,
   PaginatedResponse,
   ApiResponse,
   MarketFilters,
@@ -34,8 +34,8 @@ import { IndexerClient } from '../network/IndexerClient';
 export function useMarkets(
   client: IndexerClient,
   filters?: MarketFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Market>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Market>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<MarketData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<MarketData>> {
   return useQuery({
     queryKey: ['heavymath', 'markets', filters],
     queryFn: async () => {
@@ -64,8 +64,8 @@ export function useMarkets(
 export function useActiveMarkets(
   client: IndexerClient,
   limit: number = 50,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Market>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Market>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<MarketData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<MarketData>> {
   return useMarkets(
     client,
     {
@@ -93,8 +93,8 @@ export function useActiveMarkets(
 export function useMarket(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<Market>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<Market>> {
+  options?: Omit<UseQueryOptions<ApiResponse<MarketData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketData>> {
   return useQuery({
     queryKey: ['heavymath', 'market', marketId],
     queryFn: async () => {
@@ -125,8 +125,8 @@ export function useMarket(
 export function useMarketPredictions(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<Prediction[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<Prediction[]>> {
+  options?: Omit<UseQueryOptions<ApiResponse<PredictionData[]>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<PredictionData[]>> {
   return useQuery({
     queryKey: ['heavymath', 'market-predictions', marketId],
     queryFn: async () => {
@@ -157,8 +157,8 @@ export function useMarketPredictions(
 export function useMarketHistory(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<StateHistory[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<StateHistory[]>> {
+  options?: Omit<UseQueryOptions<ApiResponse<MarketStateHistoryData[]>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketStateHistoryData[]>> {
   return useQuery({
     queryKey: ['heavymath', 'market-history', marketId],
     queryFn: async () => {
@@ -189,9 +189,9 @@ export function useMarketDetails(
   client: IndexerClient,
   marketId: string | undefined
 ): {
-  market: UseQueryResult<ApiResponse<Market>>;
-  predictions: UseQueryResult<ApiResponse<Prediction[]>>;
-  history: UseQueryResult<ApiResponse<StateHistory[]>>;
+  market: UseQueryResult<ApiResponse<MarketData>>;
+  predictions: UseQueryResult<ApiResponse<PredictionData[]>>;
+  history: UseQueryResult<ApiResponse<MarketStateHistoryData[]>>;
   isLoading: boolean;
   isError: boolean;
 } {
