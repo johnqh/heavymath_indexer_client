@@ -1,11 +1,12 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "@sudobility/heavymath_indexer_client",
       "devDependencies": {
-        "@sudobility/heavymath_types": "^0.0.9",
-        "@sudobility/types": "^1.9.54",
+        "@sudobility/heavymath_types": "^0.0.10",
+        "@sudobility/types": "^1.9.55",
         "@tanstack/react-query": "^5.90.5",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/react": "^16.3.0",
@@ -30,8 +31,8 @@
         "zustand": "^5.0.0",
       },
       "peerDependencies": {
-        "@sudobility/heavymath_types": "^0.0.9",
-        "@sudobility/types": "^1.9.54",
+        "@sudobility/heavymath_types": "^0.0.10",
+        "@sudobility/types": "^1.9.55",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
         "zustand": "^5.0.0",
@@ -211,9 +212,9 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.0.0", "", {}, "sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA=="],
 
-    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.9", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-iJasGCiBORLypqzSD/3a3dApIpzSHJxqx8u3xpNlCO29lAMfjlDP487AEbbSXSoofdKuZZ2Qn4qzX00kkTEdKA=="],
+    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.10", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-n6h4TeDmS0ZohMVSsYKiL/L+SFBU2M5eg5G5vBiXYg3TSMCNcNqH4CjvlkFZC34xK+OXZ1vCxLCHHpC8jRtkzQ=="],
 
-    "@sudobility/types": ["@sudobility/types@1.9.54", "", {}, "sha512-A2Kxr639D8NqPbudeARhp1cbKlE6YBf7NKaU8Gh1XwajgV9sqTBMEB+IfFpifU/tKg1JFEj/t5qmPPK4VzdZaw=="],
+    "@sudobility/types": ["@sudobility/types@1.9.55", "", {}, "sha512-cl8RwuaKSa6hBTuH7ipTXtJH1dLQCtLJsxEnwMmKvpCN+RINP6nR8VDUTmHONLP1IQ1pSPBvUmR0Ip+J63cL5g=="],
 
     "@tanstack/query-core": ["@tanstack/query-core@5.90.10", "", {}, "sha512-EhZVFu9rl7GfRNuJLJ3Y7wtbTnENsvzp+YpcAV7kCYiXni1v8qZh++lpw4ch4rrwC0u/EZRnBHIehzCGzwXDSQ=="],
 
