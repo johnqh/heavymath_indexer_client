@@ -5,7 +5,7 @@
     "dist",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/__tests__/**",
-    "**/__integration__/**"
+    "**/*.spec.ts",
+    "**/__tests__/**/*"
   ]
 }

@@ -5,9 +5,9 @@
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
-  DealerNFT,
-  DealerPermission,
-  Market,
+  DealerNftData,
+  DealerPermissionData,
+  MarketData,
   PaginatedResponse,
   ApiResponse,
   DealerFilters,
@@ -26,8 +26,8 @@ import { IndexerClient } from '../network/IndexerClient';
 export function useDealers(
   client: IndexerClient,
   filters?: DealerFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<DealerNFT>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<DealerNFT>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<DealerNftData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<DealerNftData>> {
   return useQuery({
     queryKey: ['heavymath', 'dealers', filters],
     queryFn: async () => {
@@ -79,8 +79,8 @@ export function useIsDealer(
 export function useDealerNFTs(
   client: IndexerClient,
   walletAddress: string | undefined,
-  options?: Omit<UseQueryOptions<DealerNFT[]>, 'queryKey' | 'queryFn'>
-): UseQueryResult<DealerNFT[]> {
+  options?: Omit<UseQueryOptions<DealerNftData[]>, 'queryKey' | 'queryFn'>
+): UseQueryResult<DealerNftData[]> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-nfts', walletAddress],
     queryFn: async () => {
@@ -107,8 +107,8 @@ export function useDealerNFTs(
 export function useDealer(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<DealerNFT>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<DealerNFT>> {
+  options?: Omit<UseQueryOptions<ApiResponse<DealerNftData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<DealerNftData>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer', dealerId],
     queryFn: async () => {
@@ -134,8 +134,8 @@ export function useDealer(
 export function useDealerPermissions(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<DealerPermission[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<DealerPermission[]>> {
+  options?: Omit<UseQueryOptions<ApiResponse<DealerPermissionData[]>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<DealerPermissionData[]>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-permissions', dealerId],
     queryFn: async () => {
@@ -161,8 +161,8 @@ export function useDealerPermissions(
 export function useDealerMarkets(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<Market[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<Market[]>> {
+  options?: Omit<UseQueryOptions<ApiResponse<MarketData[]>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketData[]>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-markets', dealerId],
     queryFn: async () => {
@@ -189,8 +189,8 @@ export function useDealerDashboard(
   client: IndexerClient,
   walletAddress: string | undefined
 ): {
-  nfts: UseQueryResult<DealerNFT[]>;
-  markets: UseQueryResult<Market[]>;
+  nfts: UseQueryResult<DealerNftData[]>;
+  markets: UseQueryResult<MarketData[]>;
   isLoading: boolean;
   isError: boolean;
 } {
@@ -205,7 +205,7 @@ export function useDealerDashboard(
       const marketResults = await Promise.all(marketPromises);
 
       // Flatten markets and remove duplicates
-      const marketsMap = new Map<string, Market>();
+      const marketsMap = new Map<string, MarketData>();
       marketResults.forEach(result => {
         if (result.data) {
           result.data.forEach(market => marketsMap.set(market.id, market));

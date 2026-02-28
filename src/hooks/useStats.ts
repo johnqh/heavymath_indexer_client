@@ -4,7 +4,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { MarketStats, HealthStatus, ApiResponse } from '../types';
+import type { MarketStatsData, HealthData, ApiResponse } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -21,8 +21,8 @@ import { IndexerClient } from '../network/IndexerClient';
  */
 export function useMarketStats(
   client: IndexerClient,
-  options?: Omit<UseQueryOptions<ApiResponse<MarketStats>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<MarketStats>> {
+  options?: Omit<UseQueryOptions<ApiResponse<MarketStatsData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketStatsData>> {
   return useQuery({
     queryKey: ['heavymath', 'market-stats'],
     queryFn: async () => {
@@ -48,8 +48,8 @@ export function useMarketStats(
  */
 export function useHealth(
   client: IndexerClient,
-  options?: Omit<UseQueryOptions<ApiResponse<HealthStatus>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<HealthStatus>> {
+  options?: Omit<UseQueryOptions<ApiResponse<HealthData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<HealthData>> {
   return useQuery({
     queryKey: ['heavymath', 'health'],
     queryFn: async () => {

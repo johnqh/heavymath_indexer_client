@@ -4,7 +4,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { FeeWithdrawal, PaginatedResponse, WithdrawalFilters } from '../types';
+import type { FeeWithdrawalData, PaginatedResponse, WithdrawalFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -22,8 +22,8 @@ import { IndexerClient } from '../network/IndexerClient';
 export function useWithdrawals(
   client: IndexerClient,
   filters?: WithdrawalFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawalData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<FeeWithdrawalData>> {
   return useQuery({
     queryKey: ['heavymath', 'withdrawals', filters],
     queryFn: async () => {
@@ -47,8 +47,8 @@ export function useWithdrawals(
 export function useDealerWithdrawals(
   client: IndexerClient,
   dealerAddress: string | undefined,
-  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawalData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<FeeWithdrawalData>> {
   return useWithdrawals(
     client,
     {
@@ -73,8 +73,8 @@ export function useDealerWithdrawals(
  */
 export function useSystemWithdrawals(
   client: IndexerClient,
-  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawalData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<FeeWithdrawalData>> {
   return useWithdrawals(
     client,
     {
@@ -96,8 +96,8 @@ export function useSystemWithdrawals(
 export function useMarketWithdrawals(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawal>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<FeeWithdrawal>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<FeeWithdrawalData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<FeeWithdrawalData>> {
   return useWithdrawals(
     client,
     {

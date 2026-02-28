@@ -4,7 +4,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { Prediction, PaginatedResponse, ApiResponse, PredictionFilters } from '../types';
+import type { PredictionData, PaginatedResponse, ApiResponse, PredictionFilters } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -22,8 +22,8 @@ import { IndexerClient } from '../network/IndexerClient';
 export function usePredictions(
   client: IndexerClient,
   filters?: PredictionFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Prediction>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<PredictionData>> {
   return useQuery({
     queryKey: ['heavymath', 'predictions', filters],
     queryFn: async () => {
@@ -48,8 +48,8 @@ export function useUserPredictions(
   client: IndexerClient,
   walletAddress: string | undefined,
   filters?: Omit<PredictionFilters, 'user'>,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Prediction>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<PredictionData>> {
   return usePredictions(
     client,
     {
@@ -74,8 +74,8 @@ export function useUserPredictions(
 export function useActiveBets(
   client: IndexerClient,
   walletAddress: string | undefined,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Prediction>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<PredictionData>> {
   return useUserPredictions(
     client,
     walletAddress,
@@ -98,8 +98,8 @@ export function useActiveBets(
 export function usePastBets(
   client: IndexerClient,
   walletAddress: string | undefined,
-  options?: Omit<UseQueryOptions<PaginatedResponse<Prediction>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<Prediction>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<PredictionData>> {
   return useUserPredictions(
     client,
     walletAddress,
@@ -123,8 +123,8 @@ export function usePastBets(
 export function usePrediction(
   client: IndexerClient,
   predictionId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<Prediction>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<Prediction>> {
+  options?: Omit<UseQueryOptions<ApiResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<PredictionData>> {
   return useQuery({
     queryKey: ['heavymath', 'prediction', predictionId],
     queryFn: async () => {
@@ -151,8 +151,8 @@ export function useUserBettingHistory(
   client: IndexerClient,
   walletAddress: string | undefined
 ): {
-  active: UseQueryResult<PaginatedResponse<Prediction>>;
-  claimed: UseQueryResult<PaginatedResponse<Prediction>>;
+  active: UseQueryResult<PaginatedResponse<PredictionData>>;
+  claimed: UseQueryResult<PaginatedResponse<PredictionData>>;
   isLoading: boolean;
   isError: boolean;
 } {
