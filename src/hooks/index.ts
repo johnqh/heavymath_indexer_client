@@ -25,3 +25,6 @@ export * from './useFavorites';
 
 // Real-time SSE hooks
 export * from './useSSE';
+
+// Sports API proxy hooks
+export * from './sports';

@@ -58,7 +58,7 @@ describe('IndexerClient', () => {
 
       const result = await client.getMarkets();
 
-      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/markets`);
+      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/markets/list`);
       expect(result).toEqual(mockData);
     });
 
@@ -240,7 +240,7 @@ describe('IndexerClient', () => {
 
       await client.getDealers();
 
-      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/dealers`);
+      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/dealers/list`);
     });
 
     it('should filter by owner', async () => {
@@ -489,7 +489,7 @@ describe('IndexerClient', () => {
 
       await clientWithSlash.getMarkets();
 
-      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/markets`);
+      expect(mockNetworkClient.get).toHaveBeenCalledWith(`${BASE_URL}/api/markets/list`);
     });
   });
 

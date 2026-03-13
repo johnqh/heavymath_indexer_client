@@ -27,6 +27,7 @@ import type {
   WalletFavoritesFilters,
   CreateFavoriteRequest,
 } from '../types';
+import type { SportsApiResponse, SportsQueryParams } from '../types/sports';
 
 /**
  * Build a full URL by joining a base URL and path.
@@ -102,7 +103,7 @@ export class IndexerClient {
     if (filters?.offset) params.append('offset', filters.offset.toString());
 
     const queryString = params.toString();
-    const path = `/api/markets${queryString ? `?${queryString}` : ''}`;
+    const path = `/api/markets/list${queryString ? `?${queryString}` : ''}`;
 
     const response = await this.networkClient.get<PaginatedResponse<MarketData>>(
       buildUrl(this.baseUrl, path)
@@ -250,7 +251,7 @@ export class IndexerClient {
     if (filters?.offset) params.append('offset', filters.offset.toString());
 
     const queryString = params.toString();
-    const path = `/api/dealers${queryString ? `?${queryString}` : ''}`;
+    const path = `/api/dealers/list${queryString ? `?${queryString}` : ''}`;
 
     const response = await this.networkClient.get<PaginatedResponse<DealerNftData>>(
       buildUrl(this.baseUrl, path)
@@ -537,6 +538,55 @@ export class IndexerClient {
 
     if (!response.ok || !response.data) {
       throw handleApiError(response, 'get health');
+    }
+
+    return response.data;
+  }
+
+  // =============================================================================
+  // SPORTS API PROXY ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Generic sports API proxy call.
+   * Proxies any api-sports.io request through the indexer with server-side caching.
+   * Returns the raw api-sports.io response body (passthrough format).
+   *
+   * @param sport - Sport identifier (e.g., 'football', 'basketball')
+   * @param endpoint - API endpoint path (e.g., '/countries', '/fixtures')
+   * @param params - Optional query parameters to forward
+   * @returns The raw api-sports.io response
+   * @throws Error if the request fails
+   *
+   * @example
+   * ```ts
+   * const data = await client.getSportsData('football', '/countries');
+   * const leagues = await client.getSportsData('basketball', '/leagues', { season: '2023-2024' });
+   * ```
+   */
+  async getSportsData<T = unknown>(
+    sport: string,
+    endpoint: string,
+    params?: SportsQueryParams
+  ): Promise<SportsApiResponse<T>> {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      }
+    }
+
+    const queryString = searchParams.toString();
+    const path = `/api/sports/${encodeURIComponent(sport)}${endpoint}${queryString ? `?${queryString}` : ''}`;
+
+    const response = await this.networkClient.get<SportsApiResponse<T>>(
+      buildUrl(this.baseUrl, path)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, `get sports data (${sport}${endpoint})`);
     }
 
     return response.data;
