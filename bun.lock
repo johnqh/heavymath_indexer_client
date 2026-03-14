@@ -5,7 +5,7 @@
     "": {
       "name": "@sudobility/heavymath_indexer_client",
       "devDependencies": {
-        "@sudobility/heavymath_types": "^0.0.11",
+        "@sudobility/heavymath_types": "^0.0.12",
         "@sudobility/types": "^1.9.57",
         "@tanstack/react-query": "^5.90.5",
         "@testing-library/dom": "^10.4.1",
@@ -31,7 +31,7 @@
         "zustand": "^5.0.0",
       },
       "peerDependencies": {
-        "@sudobility/heavymath_types": "^0.0.11",
+        "@sudobility/heavymath_types": "^0.0.12",
         "@sudobility/types": "^1.9.57",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -212,7 +212,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.0.0", "", {}, "sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA=="],
 
-    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.11", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-Fwhzn2vwUexi8mFrjtmb2TA4NUBcHYfjim0IBSYWeJ5Tl1Ek+lqw4SqBkbG0W+bImZ85lBi7ymrn6AXt+eLl8g=="],
+    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.12", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-CFb3CGLLR7h5MeFzEChs7ZJQ8a7IkKR0jGAcGGUUZXe3T+KBbdYxkbq9ixd1VdSkY/MePz1naozUHSIOSZD2Dg=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.57", "", {}, "sha512-POtx/cRagDEdnEwrXfuoyzhNKyGahD7TYJRZT7WYW6+9ID1ZHwWDGkI88KmenKtwsljiJPQZ9+QM7jy13hdv3g=="],
 
