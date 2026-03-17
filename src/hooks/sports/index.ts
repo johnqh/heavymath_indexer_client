@@ -6,6 +6,9 @@
 // Generic proxy hook
 export { useSportsProxy } from './useSportsProxy';
 
+// Cross-sport search
+export { useSportsSearch } from './useSportsSearch';
+
 // Per-sport hooks
 export * from './football';
 export * from './basketball';

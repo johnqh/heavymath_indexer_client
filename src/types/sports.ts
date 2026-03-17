@@ -35,3 +35,22 @@ export type SportName =
  * Generic query params for sport endpoints.
  */
 export type SportsQueryParams = Record<string, string | number | boolean | undefined>;
+
+/**
+ * Normalized team result from cross-sport search.
+ */
+export interface SearchTeamResult {
+  id: number;
+  name: string;
+  logo: string | null;
+  country: string | null;
+}
+
+/**
+ * Response from the aggregated sports search endpoint.
+ */
+export interface SportsSearchResponse {
+  query: string;
+  results: Partial<Record<SportName, SearchTeamResult[]>>;
+  totalResults: number;
+}

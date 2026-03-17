@@ -27,7 +27,7 @@ import type {
   WalletFavoritesFilters,
   CreateFavoriteRequest,
 } from '../types';
-import type { SportsApiResponse, SportsQueryParams } from '../types/sports';
+import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 
 /**
  * Build a full URL by joining a base URL and path.
@@ -546,6 +546,32 @@ export class IndexerClient {
   // =============================================================================
   // SPORTS API PROXY ENDPOINTS
   // =============================================================================
+
+  /**
+   * Cross-sport team search.
+   * Searches teams across all sports via the indexer's aggregated search endpoint.
+   * GET /api/sports/search?q={query}
+   *
+   * @param query - Search query (minimum 3 characters)
+   * @returns Aggregated search results grouped by sport
+   * @throws Error if the request fails
+   */
+  async searchSports(query: string): Promise<ApiResponse<SportsSearchResponse>> {
+    const params = new URLSearchParams();
+    params.append('q', query);
+
+    const path = `/api/sports/search?${params.toString()}`;
+
+    const response = await this.networkClient.get<ApiResponse<SportsSearchResponse>>(
+      buildUrl(this.baseUrl, path)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'search sports');
+    }
+
+    return response.data;
+  }
 
   /**
    * Generic sports API proxy call.
