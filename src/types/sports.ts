@@ -54,3 +54,15 @@ export interface SportsSearchResponse {
   results: Partial<Record<SportName, SearchTeamResult[]>>;
   totalResults: number;
 }
+
+// Sport-specific types
+export * from './baseball';
+export * from './basketball';
+export * from './football';
+export * from './hockey';
+export * from './nfl';
+export * from './rugby';
+export * from './handball';
+export * from './volleyball';
+export * from './mma';
+export * from './f1';

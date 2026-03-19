@@ -291,13 +291,7 @@ export type SSEConnectionState = 'connecting' | 'connected' | 'disconnected' | '
 // Sports API Proxy Types
 // ============================================================================
 
-export type {
-  SportsApiResponse,
-  SportName,
-  SportsQueryParams,
-  SearchTeamResult,
-  SportsSearchResponse,
-} from './types/sports';
+export * from './types/sports';
 
 /**
  * Market created event data
