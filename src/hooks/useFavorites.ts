@@ -281,3 +281,49 @@ export function useIsFavorite(
 export function useFavoritesStoreHook() {
   return useFavoritesStore();
 }
+
+const FIVE_MINUTES = 5 * 60 * 1000;
+
+/**
+ * Hook to get favorite counts across all wallets for specific items.
+ * Useful for dealers to see how popular an entity is.
+ *
+ * @example
+ * ```tsx
+ * const { counts, isLoading } = useFavoriteCounts(client, 'sports', 'soccer', 'team', ['1', '2', '3']);
+ * // counts['1'] === 5, counts['2'] === 12
+ * ```
+ */
+export function useFavoriteCounts(
+  client: IndexerClient,
+  category: string,
+  subcategory: string,
+  type: string,
+  itemIds: string[]
+): {
+  counts: Record<string, number>;
+  isLoading: boolean;
+} {
+  const enabled = itemIds.length > 0;
+
+  const query = useQuery({
+    queryKey: [
+      'heavymath',
+      'favoriteCounts',
+      category,
+      subcategory,
+      type,
+      ...itemIds.slice().sort(),
+    ],
+    queryFn: () => client.getFavoriteCounts({ category, subcategory, type, itemIds }),
+    enabled,
+    staleTime: FIVE_MINUTES,
+  });
+
+  const counts = query.data?.data ?? {};
+
+  return {
+    counts,
+    isLoading: query.isLoading,
+  };
+}

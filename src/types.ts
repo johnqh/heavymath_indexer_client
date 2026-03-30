@@ -52,6 +52,7 @@ export type {
   SSEStatsData,
   WalletFavoriteData,
   CreateFavoriteRequest,
+  FavoriteCountsFilters,
   PaginationMeta,
 } from '@sudobility/heavymath_types';
 
@@ -194,6 +195,8 @@ export interface WalletFavoritesFilters {
   /** Number of results to skip for pagination. Defaults to 0. */
   offset?: number;
 }
+
+// FavoriteCountsFilters is re-exported from @sudobility/heavymath_types above
 
 // ============================================================================
 // Server-Sent Events (SSE) Types

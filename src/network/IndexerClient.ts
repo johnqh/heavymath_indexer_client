@@ -26,6 +26,7 @@ import type {
   WalletFavoriteData,
   WalletFavoritesFilters,
   CreateFavoriteRequest,
+  FavoriteCountsFilters,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 
@@ -496,6 +497,35 @@ export class IndexerClient {
 
     if (!response.ok || !response.data) {
       throw handleApiError(response, 'remove favorite');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Get favorite counts across all wallets for specific items.
+   * GET /api/favorites/counts
+   *
+   * @param filters - Required filters: category, subcategory, type, itemIds
+   * @returns Map of itemId to favorite count (items with 0 favorites are omitted)
+   */
+  async getFavoriteCounts(
+    filters: FavoriteCountsFilters
+  ): Promise<ApiResponse<Record<string, number>>> {
+    const params = new URLSearchParams();
+    params.append('category', filters.category);
+    params.append('subcategory', filters.subcategory);
+    params.append('type', filters.type);
+    params.append('itemIds', filters.itemIds.join(','));
+
+    const path = `/api/favorites/counts?${params.toString()}`;
+
+    const response = await this.networkClient.get<ApiResponse<Record<string, number>>>(
+      buildUrl(this.baseUrl, path)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get favorite counts');
     }
 
     return response.data;
