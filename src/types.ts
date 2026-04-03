@@ -210,6 +210,31 @@ export type {
   MarketResolutionCheckError,
 } from '@sudobility/heavymath_types';
 
+// ============================================================================
+// Condition Types (re-exported from @sudobility/heavymath_types)
+// ============================================================================
+
+export type {
+  ConditionTypeValue,
+  ScoreTypeValue,
+  TeamSideValue,
+  ComparisonOperatorValue,
+  WinLossCondition,
+  MatchScoreCondition,
+  TournamentCondition,
+  ConditionData,
+} from '@sudobility/heavymath_types';
+
+export {
+  ConditionType,
+  ScoreType,
+  TeamSide,
+  ComparisonOperator,
+  encodeConditionData,
+  decodeConditionData,
+  formatConditionDescription,
+} from '@sudobility/heavymath_types';
+
 // Import for use in the union type below
 import type {
   MarketResolutionCheckSuccess,
