@@ -27,6 +27,11 @@ import type {
   WalletFavoritesFilters,
   CreateFavoriteRequest,
   FavoriteCountsFilters,
+  SetMarketOracleConfigRequest,
+  MarketOracleConfigData,
+  MarketResolutionCheck,
+  MarketResolutionCheckSuccess,
+  MarketResolutionCheckError,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 
@@ -412,6 +417,96 @@ export class IndexerClient {
     }
 
     return response.data;
+  }
+
+  // =============================================================================
+  // ORACLE RESOLUTION ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Set the oracle resolution config for a market.
+   * POST /api/markets/:id/oracle-config
+   *
+   * Called after on-chain market creation to store which team's win = positive outcome.
+   *
+   * @param marketId - Chain-prefixed market ID
+   * @param config - Oracle config with positive team info
+   * @returns The created oracle config
+   * @throws Error if the market is not found or doesn't have an oracle
+   */
+  async setMarketOracleConfig(
+    marketId: string,
+    config: SetMarketOracleConfigRequest
+  ): Promise<ApiResponse<MarketOracleConfigData>> {
+    const response = await this.networkClient.post<ApiResponse<MarketOracleConfigData>>(
+      buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/oracle-config`),
+      config
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'set market oracle config');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Get the oracle resolution config for a market.
+   * GET /api/markets/:id/oracle-config
+   *
+   * @param marketId - Chain-prefixed market ID
+   * @returns The oracle config data
+   * @throws Error if the config is not found
+   */
+  async getMarketOracleConfig(marketId: string): Promise<ApiResponse<MarketOracleConfigData>> {
+    const response = await this.networkClient.get<ApiResponse<MarketOracleConfigData>>(
+      buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/oracle-config`)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get market oracle config');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Check if a market can be resolved via oracle.
+   * GET /api/markets/:id/resolve
+   *
+   * Returns the resolution result if the game has ended (HTTP 200),
+   * or an error if the game hasn't ended yet (HTTP 400).
+   *
+   * Unlike other methods, this does NOT throw on 400 — it returns a
+   * structured result so the UI can display the reason.
+   *
+   * @param marketId - Chain-prefixed market ID
+   * @returns Resolution check result (ok: true with data, or ok: false with error)
+   */
+  async checkMarketResolution(marketId: string): Promise<MarketResolutionCheck> {
+    const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/resolve`);
+
+    const response = await this.networkClient.get<
+      MarketResolutionCheckSuccess | MarketResolutionCheckError
+    >(url);
+
+    if (response.ok && response.data) {
+      return {
+        ok: true,
+        data: response.data as MarketResolutionCheckSuccess,
+      };
+    }
+
+    // 400 or other error — return structured error instead of throwing
+    const errorData = response.data as MarketResolutionCheckError | undefined;
+    return {
+      ok: false,
+      error: errorData ?? {
+        success: false,
+        error: `API Error (${response.status}): Failed to check market resolution`,
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 
   // =============================================================================

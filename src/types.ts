@@ -199,6 +199,71 @@ export interface WalletFavoritesFilters {
 // FavoriteCountsFilters is re-exported from @sudobility/heavymath_types above
 
 // ============================================================================
+// Oracle Resolution Types
+// ============================================================================
+
+/**
+ * Request body for setting oracle config on a market.
+ */
+export interface SetMarketOracleConfigRequest {
+  /** Sports API team ID whose win = positive outcome */
+  positiveTeamId: string;
+  /** Display name of the positive team */
+  positiveTeamName?: string;
+  /** Display name of the negative team */
+  negativeTeamName?: string;
+}
+
+/**
+ * Oracle config data returned by the API.
+ */
+export interface MarketOracleConfigData {
+  id: string;
+  chainId: number;
+  marketId: string;
+  sportCode: number;
+  gameId: string;
+  positiveTeamId: string;
+  positiveTeamName: string | null;
+  negativeTeamName: string | null;
+  createdAt: number;
+}
+
+/**
+ * Successful resolution check response (HTTP 200).
+ * The `result` field is what Chainlink extracts on-chain.
+ */
+export interface MarketResolutionCheckSuccess {
+  /** 1 = positive outcome, 0 = negative outcome */
+  result: number;
+  gameFinished: true;
+  positiveTeamName: string | null;
+  negativeTeamName: string | null;
+  winnerId: number;
+  winnerName: string;
+  score: string;
+  description: string;
+  timestamp: string;
+}
+
+/**
+ * Failed resolution check response (HTTP 400).
+ */
+export interface MarketResolutionCheckError {
+  success: false;
+  error: string;
+  gameStatus?: string;
+  timestamp: string;
+}
+
+/**
+ * Union type for the resolve endpoint response.
+ */
+export type MarketResolutionCheck =
+  | { ok: true; data: MarketResolutionCheckSuccess }
+  | { ok: false; error: MarketResolutionCheckError };
+
+// ============================================================================
 // Server-Sent Events (SSE) Types
 // ============================================================================
 

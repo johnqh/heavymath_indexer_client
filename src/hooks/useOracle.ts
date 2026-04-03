@@ -4,7 +4,14 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { OracleRequestData, PaginatedResponse, ApiResponse, OracleFilters } from '../types';
+import type {
+  OracleRequestData,
+  PaginatedResponse,
+  ApiResponse,
+  OracleFilters,
+  MarketResolutionCheck,
+  MarketOracleConfigData,
+} from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -127,4 +134,67 @@ export function usePendingOracleRequests(
     },
     options
   );
+}
+
+/**
+ * Check if a market can be resolved via oracle.
+ * Calls GET /api/markets/:id/resolve to determine if the game has ended
+ * and what the outcome would be.
+ *
+ * Unlike most hooks, this does NOT throw on 400 — it returns a structured
+ * result with ok: false so the UI can display why resolution isn't available yet.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useCheckMarketResolution(client, '11155111-5');
+ * if (data?.ok) {
+ *   console.log('Result:', data.data.result); // 0 or 1
+ * } else if (data) {
+ *   console.log('Not ready:', data.error.error);
+ * }
+ * ```
+ */
+export function useCheckMarketResolution(
+  client: IndexerClient | null,
+  marketId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<MarketResolutionCheck> {
+  return useQuery({
+    queryKey: ['heavymath', 'market-resolution-check', marketId],
+    queryFn: async () => {
+      if (!client || !marketId) throw new Error('Client and marketId are required');
+      return await client.checkMarketResolution(marketId);
+    },
+    enabled: !!client && !!marketId && options?.enabled !== false,
+    staleTime: 30 * 1000, // 30s - game status can change
+    retry: false,
+  });
+}
+
+/**
+ * Get the oracle resolution config for a market.
+ * GET /api/markets/:id/oracle-config
+ *
+ * @example
+ * ```tsx
+ * const { data } = useMarketOracleConfig(client, '11155111-5');
+ * console.log(data?.data.positiveTeamName);
+ * ```
+ */
+export function useMarketOracleConfig(
+  client: IndexerClient | null,
+  marketId: string | undefined,
+  options?: Omit<UseQueryOptions<ApiResponse<MarketOracleConfigData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketOracleConfigData>> {
+  return useQuery({
+    queryKey: ['heavymath', 'market-oracle-config', marketId],
+    queryFn: async () => {
+      if (!client || !marketId) throw new Error('Client and marketId are required');
+      return await client.getMarketOracleConfig(marketId);
+    },
+    enabled: !!client && !!marketId && (options?.enabled ?? true),
+    staleTime: 5 * 60 * 1000, // 5 minutes - config rarely changes
+    retry: false,
+    ...options,
+  });
 }
