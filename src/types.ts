@@ -199,65 +199,26 @@ export interface WalletFavoritesFilters {
 // FavoriteCountsFilters is re-exported from @sudobility/heavymath_types above
 
 // ============================================================================
-// Oracle Resolution Types
+// Oracle Resolution Types (re-exported from @sudobility/heavymath_types)
 // ============================================================================
 
-/**
- * Request body for setting oracle config on a market.
- */
-export interface SetMarketOracleConfigRequest {
-  /** Sports API team ID whose win = positive outcome */
-  positiveTeamId: string;
-  /** Display name of the positive team */
-  positiveTeamName?: string;
-  /** Display name of the negative team */
-  negativeTeamName?: string;
-}
+// Re-export shared oracle types
+export type {
+  SetMarketOracleConfigRequest,
+  MarketOracleConfigData,
+  MarketResolutionCheckSuccess,
+  MarketResolutionCheckError,
+} from '@sudobility/heavymath_types';
 
-/**
- * Oracle config data returned by the API.
- */
-export interface MarketOracleConfigData {
-  id: string;
-  chainId: number;
-  marketId: string;
-  sportCode: number;
-  gameId: string;
-  positiveTeamId: string;
-  positiveTeamName: string | null;
-  negativeTeamName: string | null;
-  createdAt: number;
-}
-
-/**
- * Successful resolution check response (HTTP 200).
- * The `result` field is what Chainlink extracts on-chain.
- */
-export interface MarketResolutionCheckSuccess {
-  /** 1 = positive outcome, 0 = negative outcome */
-  result: number;
-  gameFinished: true;
-  positiveTeamName: string | null;
-  negativeTeamName: string | null;
-  winnerId: number;
-  winnerName: string;
-  score: string;
-  description: string;
-  timestamp: string;
-}
-
-/**
- * Failed resolution check response (HTTP 400).
- */
-export interface MarketResolutionCheckError {
-  success: false;
-  error: string;
-  gameStatus?: string;
-  timestamp: string;
-}
+// Import for use in the union type below
+import type {
+  MarketResolutionCheckSuccess,
+  MarketResolutionCheckError,
+} from '@sudobility/heavymath_types';
 
 /**
  * Union type for the resolve endpoint response.
+ * Client-specific discriminated union wrapping the shared response types.
  */
 export type MarketResolutionCheck =
   | { ok: true; data: MarketResolutionCheckSuccess }
