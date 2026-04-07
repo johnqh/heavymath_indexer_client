@@ -611,10 +611,12 @@ export class IndexerClient {
     params.append('category', filters.category);
     params.append('subcategory', filters.subcategory);
     params.append('type', filters.type);
-    params.append('itemIds', filters.itemIds.join(','));
+    // itemIds is optional — omit to get all non-zero counts for the category
+    if (filters.itemIds && filters.itemIds.length > 0) {
+      params.append('itemIds', filters.itemIds.join(','));
+    }
 
     const path = `/api/favorites/counts?${params.toString()}`;
-
     const response = await this.networkClient.get<ApiResponse<Record<string, number>>>(
       buildUrl(this.baseUrl, path)
     );
@@ -622,7 +624,6 @@ export class IndexerClient {
     if (!response.ok || !response.data) {
       throw handleApiError(response, 'get favorite counts');
     }
-
     return response.data;
   }
 

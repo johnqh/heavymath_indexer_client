@@ -307,15 +307,8 @@ export function useFavoriteCounts(
   const enabled = itemIds.length > 0;
 
   const query = useQuery({
-    queryKey: [
-      'heavymath',
-      'favoriteCounts',
-      category,
-      subcategory,
-      type,
-      ...itemIds.slice().sort(),
-    ],
-    queryFn: () => client.getFavoriteCounts({ category, subcategory, type, itemIds }),
+    queryKey: ['heavymath', 'favoriteCounts', category, subcategory, type],
+    queryFn: () => client.getFavoriteCounts({ category, subcategory, type }),
     enabled,
     staleTime: FIVE_MINUTES,
   });
