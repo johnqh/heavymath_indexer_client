@@ -526,6 +526,102 @@ export class IndexerClient {
     }
   }
 
+  /**
+   * Lock a market via the indexer's resolver wallet.
+   * POST /api/markets/:id/trigger-lock
+   *
+   * Calls PredictionMarket.lockMarket() on-chain. Gas is paid by the
+   * resolver wallet, not the user's wallet.
+   *
+   * @param marketId - Chain-prefixed market ID
+   * @returns Success with transaction hash, or error
+   */
+  async triggerLock(
+    marketId: string
+  ): Promise<{ success: boolean; transactionHash?: string; error?: string }> {
+    const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/trigger-lock`);
+
+    try {
+      const response = await this.networkClient.post<{
+        success: boolean;
+        locked: boolean;
+        transactionHash: string;
+      }>(url, undefined);
+
+      if (response.ok && response.data) {
+        return { success: true, transactionHash: response.data.transactionHash };
+      }
+
+      return { success: false, error: 'Unexpected response' };
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error && 'response' in error) {
+        const networkError = error as { status: number; response?: { error?: string } };
+        return {
+          success: false,
+          error: networkError.response?.error ?? `API Error (${networkError.status})`,
+        };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Trigger oracle resolution via the indexer's authorized updater.
+   * POST /api/markets/:id/trigger-resolve
+   *
+   * Computes the game result from the sports API and pushes it on-chain
+   * via OracleResolver.updateOracleData(). After success, the market can
+   * be finalized by calling completeOracleResolution() on-chain.
+   *
+   * Like checkMarketResolution, this does NOT throw on 4xx — it returns
+   * a structured result so the UI can display the reason.
+   *
+   * @param marketId - Chain-prefixed market ID
+   * @returns Resolution result with oracleUpdated flag, or error
+   */
+  async triggerResolve(marketId: string): Promise<MarketResolutionCheck> {
+    const url = buildUrl(
+      this.baseUrl,
+      `/api/markets/${encodeURIComponent(marketId)}/trigger-resolve`
+    );
+
+    try {
+      const response = await this.networkClient.post<
+        MarketResolutionCheckSuccess & { oracleUpdated: boolean; transactionHash: string }
+      >(url, undefined);
+
+      if (response.ok && response.data) {
+        return {
+          ok: true,
+          data: response.data as MarketResolutionCheckSuccess,
+        };
+      }
+
+      return {
+        ok: false,
+        error: {
+          success: false,
+          error: `Unexpected response (${response.status})`,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error && 'response' in error) {
+        const networkError = error as { status: number; response?: unknown };
+        const errorData = networkError.response as MarketResolutionCheckError | undefined;
+        return {
+          ok: false,
+          error: errorData ?? {
+            success: false,
+            error: `API Error (${networkError.status}): Failed to trigger resolution`,
+            timestamp: new Date().toISOString(),
+          },
+        };
+      }
+      throw error;
+    }
+  }
+
   // =============================================================================
   // WALLET FAVORITES ENDPOINTS
   // =============================================================================

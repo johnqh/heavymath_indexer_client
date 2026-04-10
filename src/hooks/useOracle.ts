@@ -3,7 +3,13 @@
  * Uses React Query for caching and data fetching
  */
 
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  UseQueryResult,
+  UseMutationResult,
+} from '@tanstack/react-query';
 import type {
   OracleRequestData,
   PaginatedResponse,
@@ -196,5 +202,42 @@ export function useMarketOracleConfig(
     staleTime: 5 * 60 * 1000, // 5 minutes - config rarely changes
     retry: false,
     ...options,
+  });
+}
+
+type TriggerLockResult = { success: boolean; transactionHash?: string; error?: string };
+
+/**
+ * Lock a market via the indexer's resolver wallet.
+ * POST /api/markets/:id/trigger-lock
+ *
+ * Gas is paid by the resolver wallet, not the user.
+ */
+export function useTriggerLock(
+  client: IndexerClient | null
+): UseMutationResult<TriggerLockResult, Error, string> {
+  return useMutation({
+    mutationFn: async (marketId: string) => {
+      if (!client) throw new Error('Client is required');
+      return await client.triggerLock(marketId);
+    },
+  });
+}
+
+/**
+ * Resolve a locked market via the indexer's resolver wallet.
+ * POST /api/markets/:id/trigger-resolve
+ *
+ * Pushes oracle data on-chain and completes resolution.
+ * Gas is paid by the resolver wallet, not the user.
+ */
+export function useTriggerResolve(
+  client: IndexerClient | null
+): UseMutationResult<MarketResolutionCheck, Error, string> {
+  return useMutation({
+    mutationFn: async (marketId: string) => {
+      if (!client) throw new Error('Client is required');
+      return await client.triggerResolve(marketId);
+    },
   });
 }
