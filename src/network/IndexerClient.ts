@@ -486,27 +486,44 @@ export class IndexerClient {
   async checkMarketResolution(marketId: string): Promise<MarketResolutionCheck> {
     const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/resolve`);
 
-    const response = await this.networkClient.get<
-      MarketResolutionCheckSuccess | MarketResolutionCheckError
-    >(url);
+    try {
+      const response = await this.networkClient.get<MarketResolutionCheckSuccess>(url);
 
-    if (response.ok && response.data) {
+      if (response.ok && response.data) {
+        return {
+          ok: true,
+          data: response.data as MarketResolutionCheckSuccess,
+        };
+      }
+
+      // Shouldn't reach here (WebNetworkClient throws on !ok), but handle gracefully
       return {
-        ok: true,
-        data: response.data as MarketResolutionCheckSuccess,
+        ok: false,
+        error: {
+          success: false,
+          error: `Unexpected response (${response.status})`,
+          timestamp: new Date().toISOString(),
+        },
       };
+    } catch (error: unknown) {
+      // WebNetworkClient throws NetworkError on non-2xx responses.
+      // Extract the structured error body so the UI can show the reason
+      // (e.g. "Game has not ended yet") instead of a generic error.
+      if (error && typeof error === 'object' && 'status' in error && 'response' in error) {
+        const networkError = error as { status: number; response?: unknown };
+        const errorData = networkError.response as MarketResolutionCheckError | undefined;
+        return {
+          ok: false,
+          error: errorData ?? {
+            success: false,
+            error: `API Error (${networkError.status}): Failed to check market resolution`,
+            timestamp: new Date().toISOString(),
+          },
+        };
+      }
+      // Re-throw actual network failures (timeouts, connection refused)
+      throw error;
     }
-
-    // 400 or other error — return structured error instead of throwing
-    const errorData = response.data as MarketResolutionCheckError | undefined;
-    return {
-      ok: false,
-      error: errorData ?? {
-        success: false,
-        error: `API Error (${response.status}): Failed to check market resolution`,
-        timestamp: new Date().toISOString(),
-      },
-    };
   }
 
   // =============================================================================

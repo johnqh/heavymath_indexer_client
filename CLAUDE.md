@@ -724,3 +724,46 @@ import type { FavoritesState } from '@heavymath/indexer_client';
 ---
 
 **Remember**: Always run `bun run check-all` before committing!
+
+## Ecosystem Context
+
+This client library is the bridge between the indexer backend and the frontend apps:
+
+```
+heavymath_contracts  (types: MarketData, PredictionData via heavymath_types)
+       ↓
+heavymath_indexer    (REST API on port 42079)
+       ↓ HTTP requests
+heavymath_indexer_client  ← YOU ARE HERE
+       ↓ React hooks + IndexerClient + Zustand store
+heavymath_lib        (wraps proxy hooks, adds favorites merging)
+       ↓
+heavymath_app        (consumes everything)
+```
+
+### Upstream: Indexer REST API
+
+`IndexerClient` methods map 1:1 to indexer REST endpoints:
+- `getMarkets()` → `GET /api/markets/list`
+- `getMarket(id)` → `GET /api/markets/:id`
+- `getMarketPredictions(id)` → `GET /api/markets/:id/predictions`
+- `getDealers()` → `GET /api/dealers/list`
+- `getFavorites()` → `GET /api/wallet/:address/favorites`
+- `getSportsData()` → `GET /api/sports/:sport/*` (proxy to api-sports.io)
+- SSE: `useSSE()` connects to `GET /api/events` endpoint
+
+When the indexer adds/changes endpoints, the corresponding `IndexerClient` method and React hook must be updated here.
+
+### Downstream: Who Consumes This
+
+- **heavymath_lib**: Imports sports proxy hooks (`useFootballLeagues`, `useBasketballTeams`, etc.), `useFavorites`, `useFavoriteCounts` — wraps them to merge favorites with sports data
+- **heavymath_app**: Imports `IndexerClient` (via `IndexerContext`), `useMarkets`, `useMarketDetails`, `useDealerDashboard`, SSE hooks, favorites hooks, and all type exports
+
+### NetworkClient Platform Differences
+
+The `IndexerClient` constructor takes a `NetworkClient` (from `@sudobility/types`):
+- **Web**: `webNetworkClient` from `@sudobility/di` — uses `fetch` API
+- **React Native**: Custom implementation wrapping React Native's networking
+- **Tests**: Mock `NetworkClient` with `vi.fn()` implementations
+
+The `NetworkClient` interface requires: `get<T>(url, options?)`, `post<T>(url, body, options?)`, `put<T>(url, body, options?)`, `delete<T>(url, options?)` — all returning `Promise<NetworkResponse<T>>`.
