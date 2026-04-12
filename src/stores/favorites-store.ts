@@ -104,8 +104,7 @@ export const useFavoritesStore = create<FavoritesState>()(
           subcategory: favorite.subcategory,
           type: favorite.type,
           itemId: favorite.id,
-          // Use number instead of BigInt for JSON serialization compatibility
-          createdAt: Math.floor(Date.now() / 1000) as unknown as bigint,
+          createdAt: Math.floor(Date.now() / 1000),
         };
 
         set(state => {

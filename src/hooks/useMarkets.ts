@@ -6,6 +6,7 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
   MarketData,
+  MarketDetailData,
   PredictionData,
   MarketStateHistoryData,
   PaginatedResponse,
@@ -93,8 +94,8 @@ export function useActiveMarkets(
 export function useMarket(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<MarketData>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<MarketData>> {
+  options?: Omit<UseQueryOptions<ApiResponse<MarketDetailData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<MarketDetailData>> {
   return useQuery({
     queryKey: ['heavymath', 'market', marketId],
     queryFn: async () => {
@@ -125,8 +126,8 @@ export function useMarket(
 export function useMarketPredictions(
   client: IndexerClient,
   marketId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<PredictionData[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<PredictionData[]>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<PredictionData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<PredictionData>> {
   return useQuery({
     queryKey: ['heavymath', 'market-predictions', marketId],
     queryFn: async () => {
@@ -189,8 +190,8 @@ export function useMarketDetails(
   client: IndexerClient,
   marketId: string | undefined
 ): {
-  market: UseQueryResult<ApiResponse<MarketData>>;
-  predictions: UseQueryResult<ApiResponse<PredictionData[]>>;
+  market: UseQueryResult<ApiResponse<MarketDetailData>>;
+  predictions: UseQueryResult<PaginatedResponse<PredictionData>>;
   history: UseQueryResult<ApiResponse<MarketStateHistoryData[]>>;
   isLoading: boolean;
   isError: boolean;

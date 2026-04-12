@@ -10,14 +10,17 @@ import type {
   ApiResponse,
   PaginatedResponse,
   MarketData,
+  MarketDetailData,
   PredictionData,
-  DealerNftData,
-  DealerPermissionData,
+  DealerWithPermissionsData,
+  LicensePermissionData,
   MarketStateHistoryData,
   FeeWithdrawalData,
   OracleRequestData,
   MarketStatsData,
   HealthData,
+  TriggerLockResponseData,
+  TriggerResolveResponseData,
   MarketFilters,
   PredictionFilters,
   DealerFilters,
@@ -130,8 +133,8 @@ export class IndexerClient {
    * @returns The market data wrapped in an API response
    * @throws Error if the market is not found or the request fails
    */
-  async getMarket(id: string): Promise<ApiResponse<MarketData>> {
-    const response = await this.networkClient.get<ApiResponse<MarketData>>(
+  async getMarket(id: string): Promise<ApiResponse<MarketDetailData>> {
+    const response = await this.networkClient.get<ApiResponse<MarketDetailData>>(
       buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(id)}`)
     );
 
@@ -150,8 +153,8 @@ export class IndexerClient {
    * @returns Array of predictions for the market
    * @throws Error if the request fails
    */
-  async getMarketPredictions(marketId: string): Promise<ApiResponse<PredictionData[]>> {
-    const response = await this.networkClient.get<ApiResponse<PredictionData[]>>(
+  async getMarketPredictions(marketId: string): Promise<PaginatedResponse<PredictionData>> {
+    const response = await this.networkClient.get<PaginatedResponse<PredictionData>>(
       buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/predictions`)
     );
 
@@ -249,7 +252,7 @@ export class IndexerClient {
    * @returns Paginated list of dealer NFTs
    * @throws Error if the request fails
    */
-  async getDealers(filters?: DealerFilters): Promise<PaginatedResponse<DealerNftData>> {
+  async getDealers(filters?: DealerFilters): Promise<PaginatedResponse<DealerWithPermissionsData>> {
     const params = new URLSearchParams();
 
     if (filters?.owner) params.append('owner', filters.owner);
@@ -259,7 +262,7 @@ export class IndexerClient {
     const queryString = params.toString();
     const path = `/api/dealers/list${queryString ? `?${queryString}` : ''}`;
 
-    const response = await this.networkClient.get<PaginatedResponse<DealerNftData>>(
+    const response = await this.networkClient.get<PaginatedResponse<DealerWithPermissionsData>>(
       buildUrl(this.baseUrl, path)
     );
 
@@ -278,8 +281,8 @@ export class IndexerClient {
    * @returns The dealer NFT data wrapped in an API response
    * @throws Error if the dealer is not found or the request fails
    */
-  async getDealer(id: string): Promise<ApiResponse<DealerNftData>> {
-    const response = await this.networkClient.get<ApiResponse<DealerNftData>>(
+  async getDealer(id: string): Promise<ApiResponse<DealerWithPermissionsData>> {
+    const response = await this.networkClient.get<ApiResponse<DealerWithPermissionsData>>(
       buildUrl(this.baseUrl, `/api/dealers/${encodeURIComponent(id)}`)
     );
 
@@ -298,8 +301,8 @@ export class IndexerClient {
    * @returns Array of permission entries for the dealer
    * @throws Error if the request fails
    */
-  async getDealerPermissions(dealerId: string): Promise<ApiResponse<DealerPermissionData[]>> {
-    const response = await this.networkClient.get<ApiResponse<DealerPermissionData[]>>(
+  async getDealerPermissions(dealerId: string): Promise<ApiResponse<LicensePermissionData[]>> {
+    const response = await this.networkClient.get<ApiResponse<LicensePermissionData[]>>(
       buildUrl(this.baseUrl, `/api/dealers/${encodeURIComponent(dealerId)}/permissions`)
     );
 
@@ -318,8 +321,8 @@ export class IndexerClient {
    * @returns Array of markets created by this dealer
    * @throws Error if the request fails
    */
-  async getDealerMarkets(dealerId: string): Promise<ApiResponse<MarketData[]>> {
-    const response = await this.networkClient.get<ApiResponse<MarketData[]>>(
+  async getDealerMarkets(dealerId: string): Promise<PaginatedResponse<MarketData>> {
+    const response = await this.networkClient.get<PaginatedResponse<MarketData>>(
       buildUrl(this.baseUrl, `/api/dealers/${encodeURIComponent(dealerId)}/markets`)
     );
 
@@ -536,33 +539,19 @@ export class IndexerClient {
    * @param marketId - Chain-prefixed market ID
    * @returns Success with transaction hash, or error
    */
-  async triggerLock(
-    marketId: string
-  ): Promise<{ success: boolean; transactionHash?: string; error?: string }> {
+  async triggerLock(marketId: string): Promise<ApiResponse<TriggerLockResponseData>> {
     const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/trigger-lock`);
 
-    try {
-      const response = await this.networkClient.post<{
-        success: boolean;
-        locked: boolean;
-        transactionHash: string;
-      }>(url, undefined);
+    const response = await this.networkClient.post<ApiResponse<TriggerLockResponseData>>(
+      url,
+      undefined
+    );
 
-      if (response.ok && response.data) {
-        return { success: true, transactionHash: response.data.transactionHash };
-      }
-
-      return { success: false, error: 'Unexpected response' };
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'status' in error && 'response' in error) {
-        const networkError = error as { status: number; response?: { error?: string } };
-        return {
-          success: false,
-          error: networkError.response?.error ?? `API Error (${networkError.status})`,
-        };
-      }
-      throw error;
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'trigger lock');
     }
+
+    return response.data;
   }
 
   /**
@@ -579,47 +568,22 @@ export class IndexerClient {
    * @param marketId - Chain-prefixed market ID
    * @returns Resolution result with oracleUpdated flag, or error
    */
-  async triggerResolve(marketId: string): Promise<MarketResolutionCheck> {
+  async triggerResolve(marketId: string): Promise<ApiResponse<TriggerResolveResponseData>> {
     const url = buildUrl(
       this.baseUrl,
       `/api/markets/${encodeURIComponent(marketId)}/trigger-resolve`
     );
 
-    try {
-      const response = await this.networkClient.post<
-        MarketResolutionCheckSuccess & { oracleUpdated: boolean; transactionHash: string }
-      >(url, undefined);
+    const response = await this.networkClient.post<ApiResponse<TriggerResolveResponseData>>(
+      url,
+      undefined
+    );
 
-      if (response.ok && response.data) {
-        return {
-          ok: true,
-          data: response.data as MarketResolutionCheckSuccess,
-        };
-      }
-
-      return {
-        ok: false,
-        error: {
-          success: false,
-          error: `Unexpected response (${response.status})`,
-          timestamp: new Date().toISOString(),
-        },
-      };
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'status' in error && 'response' in error) {
-        const networkError = error as { status: number; response?: unknown };
-        const errorData = networkError.response as MarketResolutionCheckError | undefined;
-        return {
-          ok: false,
-          error: errorData ?? {
-            success: false,
-            error: `API Error (${networkError.status}): Failed to trigger resolution`,
-            timestamp: new Date().toISOString(),
-          },
-        };
-      }
-      throw error;
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'trigger resolve');
     }
+
+    return response.data;
   }
 
   // =============================================================================

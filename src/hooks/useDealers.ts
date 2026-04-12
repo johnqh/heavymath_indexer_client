@@ -5,8 +5,8 @@
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type {
-  DealerNftData,
-  DealerPermissionData,
+  DealerWithPermissionsData,
+  LicensePermissionData,
   MarketData,
   PaginatedResponse,
   ApiResponse,
@@ -26,8 +26,11 @@ import { IndexerClient } from '../network/IndexerClient';
 export function useDealers(
   client: IndexerClient,
   filters?: DealerFilters,
-  options?: Omit<UseQueryOptions<PaginatedResponse<DealerNftData>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<PaginatedResponse<DealerNftData>> {
+  options?: Omit<
+    UseQueryOptions<PaginatedResponse<DealerWithPermissionsData>>,
+    'queryKey' | 'queryFn'
+  >
+): UseQueryResult<PaginatedResponse<DealerWithPermissionsData>> {
   return useQuery({
     queryKey: ['heavymath', 'dealers', filters],
     queryFn: async () => {
@@ -79,8 +82,8 @@ export function useIsDealer(
 export function useDealerNFTs(
   client: IndexerClient,
   walletAddress: string | undefined,
-  options?: Omit<UseQueryOptions<DealerNftData[]>, 'queryKey' | 'queryFn'>
-): UseQueryResult<DealerNftData[]> {
+  options?: Omit<UseQueryOptions<DealerWithPermissionsData[]>, 'queryKey' | 'queryFn'>
+): UseQueryResult<DealerWithPermissionsData[]> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-nfts', walletAddress],
     queryFn: async () => {
@@ -107,8 +110,8 @@ export function useDealerNFTs(
 export function useDealer(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<DealerNftData>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<DealerNftData>> {
+  options?: Omit<UseQueryOptions<ApiResponse<DealerWithPermissionsData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<DealerWithPermissionsData>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer', dealerId],
     queryFn: async () => {
@@ -134,8 +137,8 @@ export function useDealer(
 export function useDealerPermissions(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<DealerPermissionData[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<DealerPermissionData[]>> {
+  options?: Omit<UseQueryOptions<ApiResponse<LicensePermissionData[]>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<ApiResponse<LicensePermissionData[]>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-permissions', dealerId],
     queryFn: async () => {
@@ -161,8 +164,8 @@ export function useDealerPermissions(
 export function useDealerMarkets(
   client: IndexerClient,
   dealerId: string | undefined,
-  options?: Omit<UseQueryOptions<ApiResponse<MarketData[]>>, 'queryKey' | 'queryFn'>
-): UseQueryResult<ApiResponse<MarketData[]>> {
+  options?: Omit<UseQueryOptions<PaginatedResponse<MarketData>>, 'queryKey' | 'queryFn'>
+): UseQueryResult<PaginatedResponse<MarketData>> {
   return useQuery({
     queryKey: ['heavymath', 'dealer-markets', dealerId],
     queryFn: async () => {
@@ -189,7 +192,7 @@ export function useDealerDashboard(
   client: IndexerClient,
   walletAddress: string | undefined
 ): {
-  nfts: UseQueryResult<DealerNftData[]>;
+  nfts: UseQueryResult<DealerWithPermissionsData[]>;
   markets: UseQueryResult<MarketData[]>;
   isLoading: boolean;
   isError: boolean;

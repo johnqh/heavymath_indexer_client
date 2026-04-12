@@ -7,8 +7,9 @@ import type { NetworkClient } from '@sudobility/types';
 import { IndexerClient } from '../network/IndexerClient';
 import type {
   MarketData,
+  MarketDetailData,
   PredictionData,
-  DealerNftData,
+  DealerWithPermissionsData,
   PaginatedResponse,
   ApiResponse,
   PredictionFilters,
@@ -154,9 +155,9 @@ export class IndexerService {
    * @returns Array of dealer NFTs owned by the wallet (empty if not a dealer)
    * @throws Error if the API request fails
    */
-  public async getDealerNFTs(walletAddress: string): Promise<DealerNftData[]> {
+  public async getDealerNFTs(walletAddress: string): Promise<DealerWithPermissionsData[]> {
     const cacheKey = this.getCacheKey('dealer-nfts', walletAddress);
-    const cached = this.getCache<DealerNftData[]>(cacheKey);
+    const cached = this.getCache<DealerWithPermissionsData[]>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -184,11 +185,13 @@ export class IndexerService {
    * @throws Error if the API request fails
    */
   public async getDealerDashboard(walletAddress: string): Promise<{
-    nfts: DealerNftData[];
+    nfts: DealerWithPermissionsData[];
     markets: MarketData[];
   }> {
     const cacheKey = this.getCacheKey('dealer-dashboard', walletAddress);
-    const cached = this.getCache<{ nfts: DealerNftData[]; markets: MarketData[] }>(cacheKey);
+    const cached = this.getCache<{ nfts: DealerWithPermissionsData[]; markets: MarketData[] }>(
+      cacheKey
+    );
     if (cached) return cached;
 
     try {
@@ -228,13 +231,13 @@ export class IndexerService {
    * @throws Error if the market is not found or the API request fails
    */
   public async getMarketDetails(marketId: string): Promise<{
-    market: MarketData;
+    market: MarketDetailData;
     predictions: PredictionData[];
     history: MarketStateHistoryData[];
   }> {
     const cacheKey = this.getCacheKey('market-details', marketId);
     const cached = this.getCache<{
-      market: MarketData;
+      market: MarketDetailData;
       predictions: PredictionData[];
       history: MarketStateHistoryData[];
     }>(cacheKey);
@@ -320,7 +323,7 @@ export class IndexerService {
    * @returns The market data if found, or null if the prediction has no associated market
    * @throws Error if the API request fails
    */
-  public async getMarketFromPrediction(predictionId: string): Promise<MarketData | null> {
+  public async getMarketFromPrediction(predictionId: string): Promise<MarketDetailData | null> {
     try {
       const predictionResult = await this.indexerClient.getPrediction(predictionId);
       if (!predictionResult.data) {

@@ -18,6 +18,10 @@ import type {
   MarketResolutionCheck,
   MarketOracleConfigData,
 } from '../types';
+import type {
+  TriggerLockResponseData,
+  TriggerResolveResponseData,
+} from '@sudobility/heavymath_types';
 import { IndexerClient } from '../network/IndexerClient';
 
 /**
@@ -205,8 +209,6 @@ export function useMarketOracleConfig(
   });
 }
 
-type TriggerLockResult = { success: boolean; transactionHash?: string; error?: string };
-
 /**
  * Lock a market via the indexer's resolver wallet.
  * POST /api/markets/:id/trigger-lock
@@ -215,7 +217,7 @@ type TriggerLockResult = { success: boolean; transactionHash?: string; error?: s
  */
 export function useTriggerLock(
   client: IndexerClient | null
-): UseMutationResult<TriggerLockResult, Error, string> {
+): UseMutationResult<ApiResponse<TriggerLockResponseData>, Error, string> {
   return useMutation({
     mutationFn: async (marketId: string) => {
       if (!client) throw new Error('Client is required');
@@ -233,7 +235,7 @@ export function useTriggerLock(
  */
 export function useTriggerResolve(
   client: IndexerClient | null
-): UseMutationResult<MarketResolutionCheck, Error, string> {
+): UseMutationResult<ApiResponse<TriggerResolveResponseData>, Error, string> {
   return useMutation({
     mutationFn: async (marketId: string) => {
       if (!client) throw new Error('Client is required');

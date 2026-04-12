@@ -43,6 +43,7 @@ export type {
   MarketData,
   PredictionData,
   DealerNftData,
+  DealerLicenseData,
   DealerPermissionData,
   FeeWithdrawalData,
   OracleRequestData,
@@ -54,6 +55,24 @@ export type {
   CreateFavoriteRequest,
   FavoriteCountsFilters,
   PaginationMeta,
+
+  // New detailed API data types
+  LicensePermissionData,
+  DealerWithPermissionsData,
+  DealerStatsData,
+  MarketDetailStatsData,
+  CategoryCountData,
+  MarketResolutionData,
+  MarketDetailData,
+  WalletBalanceSummaryData,
+  WalletBalanceDetailData,
+  WalletTransactionData,
+  WalletHistoryItemData,
+  ServiceHealthData,
+  TriggerLockResponseData,
+  TriggerResolveResponseData,
+  ApiInfoData,
+  SportsHealthData,
 } from '@sudobility/heavymath_types';
 
 // ============================================================================
