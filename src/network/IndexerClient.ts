@@ -544,7 +544,8 @@ export class IndexerClient {
 
     const response = await this.networkClient.post<ApiResponse<TriggerLockResponseData>>(
       url,
-      undefined
+      undefined,
+      { timeout: 120_000 }
     );
 
     if (!response.ok || !response.data) {
@@ -576,7 +577,8 @@ export class IndexerClient {
 
     const response = await this.networkClient.post<ApiResponse<TriggerResolveResponseData>>(
       url,
-      undefined
+      undefined,
+      { timeout: 120_000 }
     );
 
     if (!response.ok || !response.data) {
