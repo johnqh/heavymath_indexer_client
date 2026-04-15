@@ -4,48 +4,16 @@
  */
 
 import type { Optional } from '@sudobility/types';
+import type { NflCountry } from '@sudobility/heavymath_types';
 
-export interface NflCountry {
-  id: number;
-  name: string;
-  code: Optional<string>;
-  flag: Optional<string>;
-}
-
-export interface NflLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: Optional<string>;
-}
-
-export interface NflSeason {
-  season: number;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface NflLeagueResponse {
-  league: NflLeague;
-  country: NflCountry;
-  seasons: NflSeason[];
-}
-
-export interface NflLeaguesParams {
-  id?: Optional<number>;
-  name?: Optional<string>;
-  country?: Optional<string>;
-  code?: Optional<string>;
-  season?: Optional<number>;
-  type?: Optional<string>;
-  current?: Optional<boolean>;
-  search?: Optional<string>;
-}
-
-export interface NflSeasonsParams {
-  league?: Optional<number>;
-}
+export type {
+  NflCountry,
+  NflLeague,
+  NflSeason,
+  NflLeagueResponse,
+  NflLeaguesParams,
+  NflSeasonsParams,
+} from '@sudobility/heavymath_types';
 
 export interface NflTeam {
   id: number;

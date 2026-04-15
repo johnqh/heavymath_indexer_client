@@ -2,46 +2,15 @@
  * @fileoverview Baseball type definitions
  * @description Types for baseball API responses, matching api-sports.io response format.
  */
+import type { BaseballCountry, BaseballLeague } from '@sudobility/heavymath_types';
 
-export interface BaseballCountry {
-  id: number;
-  name: string;
-  code: string | null;
-  flag: string | null;
-}
-
-export interface BaseballLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-}
-
-export interface BaseballSeason {
-  season: number;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface BaseballLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-  country: BaseballCountry;
-  seasons: BaseballSeason[];
-}
-
-export interface BaseballLeaguesParams {
-  id?: number;
-  name?: string;
-  country?: string;
-  country_id?: number;
-  type?: string;
-  season?: number;
-  search?: string;
-}
+export type {
+  BaseballCountry,
+  BaseballLeague,
+  BaseballSeason,
+  BaseballLeagueResponse,
+  BaseballLeaguesParams,
+} from '@sudobility/heavymath_types';
 
 export interface BaseballTeam {
   id: number;

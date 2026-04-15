@@ -4,50 +4,16 @@
  */
 
 import type { Optional } from '@sudobility/types';
+import type { HockeyCountry } from '@sudobility/heavymath_types';
 
-export interface HockeyCountry {
-  id: number;
-  name: string;
-  code: Optional<string>;
-  flag: Optional<string>;
-}
-
-export interface HockeyLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: Optional<string>;
-}
-
-export interface HockeySeason {
-  season: number;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface HockeyLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: Optional<string>;
-  country: HockeyCountry;
-  seasons: HockeySeason[];
-}
-
-export interface HockeyLeaguesParams {
-  id?: Optional<number>;
-  name?: Optional<string>;
-  country?: Optional<string>;
-  season?: Optional<number>;
-  type?: Optional<string>;
-  current?: Optional<boolean>;
-  search?: Optional<string>;
-}
-
-export interface HockeySeasonsParams {
-  league?: Optional<number>;
-}
+export type {
+  HockeyCountry,
+  HockeyLeague,
+  HockeySeason,
+  HockeyLeagueResponse,
+  HockeyLeaguesParams,
+  HockeySeasonsParams,
+} from '@sudobility/heavymath_types';
 
 export interface HockeyTeam {
   id: number;

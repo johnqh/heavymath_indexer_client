@@ -2,46 +2,15 @@
  * @fileoverview Volleyball type definitions
  * @description Types for volleyball API responses, matching api-sports.io response format.
  */
+import type { VolleyballLeague, VolleyballLeagueCountry } from '@sudobility/heavymath_types';
 
-export interface VolleyballLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-}
-
-export interface VolleyballLeagueCountry {
-  id: number;
-  name: string;
-  code: string | null;
-  flag: string | null;
-}
-
-export interface VolleyballLeagueSeason {
-  season: number;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface VolleyballLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-  country: VolleyballLeagueCountry;
-  seasons: VolleyballLeagueSeason[];
-}
-
-export interface VolleyballLeaguesParams {
-  id?: number;
-  name?: string;
-  country_id?: number;
-  country?: string;
-  type?: string;
-  season?: number;
-  search?: string;
-}
+export type {
+  VolleyballLeague,
+  VolleyballLeagueCountry,
+  VolleyballLeagueSeason,
+  VolleyballLeagueResponse,
+  VolleyballLeaguesParams,
+} from '@sudobility/heavymath_types';
 
 export interface VolleyballTeam {
   id: number;

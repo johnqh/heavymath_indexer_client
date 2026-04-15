@@ -2,46 +2,15 @@
  * @fileoverview Rugby type definitions
  * @description Types for rugby API responses, matching api-sports.io response format.
  */
+import type { RugbyCountry, RugbyLeague } from '@sudobility/heavymath_types';
 
-export interface RugbyCountry {
-  id: number;
-  name: string;
-  code: string | null;
-  flag: string | null;
-}
-
-export interface RugbyLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-}
-
-export interface RugbySeason {
-  season: number | string;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface RugbyLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-  country: RugbyCountry;
-  seasons: RugbySeason[];
-}
-
-export interface RugbyLeaguesParams {
-  id?: number;
-  name?: string;
-  country?: string;
-  country_id?: number;
-  type?: string;
-  season?: number | string;
-  search?: string;
-}
+export type {
+  RugbyCountry,
+  RugbyLeague,
+  RugbySeason,
+  RugbyLeagueResponse,
+  RugbyLeaguesParams,
+} from '@sudobility/heavymath_types';
 
 export interface RugbyTeam {
   id: number;

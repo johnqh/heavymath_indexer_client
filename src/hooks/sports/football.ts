@@ -5,11 +5,12 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { IndexerClient } from '../../network/IndexerClient';
 import type { SportsApiResponse, SportsQueryParams } from '../../types/sports';
+import type { FootballLeagueResponse } from '../../types/football';
 import { useSportsProxy } from './useSportsProxy';
 
-type Opts = Omit<UseQueryOptions<SportsApiResponse<any>>, 'queryKey' | 'queryFn'>;
+type Opts<T = any> = Omit<UseQueryOptions<SportsApiResponse<T>>, 'queryKey' | 'queryFn'>;
 
-type Result = UseQueryResult<SportsApiResponse<any>>;
+type Result<T = any> = UseQueryResult<SportsApiResponse<T>>;
 
 const S = 'football';
 
@@ -32,8 +33,8 @@ export function useFootballSeasons(client: IndexerClient, opts?: Opts): Result {
 export function useFootballLeagues(
   client: IndexerClient,
   params?: SportsQueryParams,
-  opts?: Opts
-): Result {
+  opts?: Opts<FootballLeagueResponse>
+): Result<FootballLeagueResponse> {
   return useSportsProxy(client, S, '/leagues', params, opts);
 }
 

@@ -5,48 +5,14 @@
 
 import type { Optional } from '@sudobility/types';
 
-export interface BasketballCountry {
-  id: number;
-  name: string;
-  code: Optional<string>;
-  flag: Optional<string>;
-}
-
-export interface BasketballLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: Optional<string>;
-}
-
-export interface BasketballSeason {
-  season: string;
-  start: string;
-  end: string;
-}
-
-export interface BasketballLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: Optional<string>;
-  country: BasketballCountry;
-  seasons: BasketballSeason[];
-}
-
-export interface BasketballLeaguesParams {
-  id?: Optional<number>;
-  name?: Optional<string>;
-  country?: Optional<string>;
-  season?: Optional<string>;
-  type?: Optional<string>;
-  current?: Optional<boolean>;
-  search?: Optional<string>;
-}
-
-export interface BasketballSeasonsParams {
-  league?: Optional<number>;
-}
+export type {
+  BasketballCountry,
+  BasketballLeague,
+  BasketballSeason,
+  BasketballLeagueResponse,
+  BasketballLeaguesParams,
+  BasketballSeasonsParams,
+} from '@sudobility/heavymath_types';
 
 export interface BasketballTeam {
   id: number;

@@ -5,64 +5,16 @@
 
 import type { Optional } from '@sudobility/types';
 
-export interface FootballCountry {
-  name: string;
-  code: Optional<string>;
-  flag: Optional<string>;
-}
-
-export interface FootballLeague {
-  id: number;
-  name: string;
-  type: 'League' | 'Cup';
-  logo: string;
-}
-
-export interface FootballSeason {
-  year: number;
-  start: string;
-  end: string;
-  current: boolean;
-  coverage: FootballSeasonCoverage;
-}
-
-export interface FootballSeasonCoverage {
-  fixtures: FootballFixturesCoverage;
-  standings: boolean;
-  players: boolean;
-  top_scorers: boolean;
-  top_assists: boolean;
-  top_cards: boolean;
-  injuries: boolean;
-  predictions: boolean;
-  odds: boolean;
-}
-
-export interface FootballFixturesCoverage {
-  events: boolean;
-  lineups: boolean;
-  statistics_fixtures: boolean;
-  statistics_players: boolean;
-}
-
-export interface FootballLeagueResponse {
-  league: FootballLeague;
-  country: FootballCountry;
-  seasons: FootballSeason[];
-}
-
-export interface FootballLeaguesParams {
-  id?: Optional<number>;
-  name?: Optional<string>;
-  country?: Optional<string>;
-  code?: Optional<string>;
-  season?: Optional<number>;
-  team?: Optional<number>;
-  type?: Optional<'league' | 'cup'>;
-  current?: Optional<boolean>;
-  search?: Optional<string>;
-  last?: Optional<number>;
-}
+export type {
+  FootballCountry,
+  FootballLeague,
+  FootballSeasonCoverage,
+  FootballFixturesCoverage,
+  FootballSeason,
+  FootballLeagueResponse,
+  FootballLeaguesParams,
+  FootballSeasonsParams,
+} from '@sudobility/heavymath_types';
 
 export interface FootballTeam {
   id: number;

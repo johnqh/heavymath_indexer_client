@@ -4,7 +4,8 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
+import type { PersistStorage, StorageValue } from 'zustand/middleware';
 import type { WalletFavoriteData, CreateFavoriteRequest } from '../types';
 
 /**
@@ -14,6 +15,10 @@ interface WalletFavoritesState {
   favorites: WalletFavoriteData[];
   lastFetched: number | null;
 }
+
+type PersistedFavoritesState = {
+  walletFavorites: Record<string, WalletFavoritesState>;
+};
 
 /**
  * Favorites store state
@@ -61,6 +66,38 @@ export interface FavoritesState {
 
 /** Default max age for favorites cache (5 minutes) */
 const DEFAULT_MAX_AGE = 5 * 60 * 1000;
+
+const noopStorage = {
+  getItem: (_name: string) => null,
+  setItem: (_name: string, _value: string) => {},
+  removeItem: (_name: string) => {},
+};
+
+/**
+ * Create a persist storage adapter that is safe in browser, SSR, and test environments.
+ */
+function getFavoritesStorage(): PersistStorage<PersistedFavoritesState> {
+  const storage =
+    typeof globalThis.localStorage !== 'undefined' &&
+    typeof globalThis.localStorage.getItem === 'function' &&
+    typeof globalThis.localStorage.setItem === 'function' &&
+    typeof globalThis.localStorage.removeItem === 'function'
+      ? globalThis.localStorage
+      : noopStorage;
+
+  return {
+    getItem: (name: string): StorageValue<PersistedFavoritesState> | null => {
+      const value = storage.getItem(name);
+      return value ? (JSON.parse(value) as StorageValue<PersistedFavoritesState>) : null;
+    },
+    setItem: (name: string, value: StorageValue<PersistedFavoritesState>): void => {
+      storage.setItem(name, JSON.stringify(value));
+    },
+    removeItem: (name: string): void => {
+      storage.removeItem(name);
+    },
+  };
+}
 
 /**
  * Create a temporary ID for optimistic updates
@@ -236,18 +273,7 @@ export const useFavoritesStore = create<FavoritesState>()(
     }),
     {
       name: 'heavymath-favorites',
-      storage: createJSONStorage(() => {
-        // Use localStorage in browser, or a no-op storage for SSR/React Native
-        if (typeof window !== 'undefined' && window.localStorage) {
-          return window.localStorage;
-        }
-        // No-op storage for non-browser environments
-        return {
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {},
-        };
-      }),
+      storage: getFavoritesStorage(),
       partialize: state => ({
         walletFavorites: state.walletFavorites,
       }),

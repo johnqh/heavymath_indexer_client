@@ -2,46 +2,15 @@
  * @fileoverview Handball type definitions
  * @description Types for handball API responses, matching api-sports.io response format.
  */
+import type { HandballLeague, HandballLeagueCountry } from '@sudobility/heavymath_types';
 
-export interface HandballLeague {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-}
-
-export interface HandballLeagueCountry {
-  id: number;
-  name: string;
-  code: string | null;
-  flag: string | null;
-}
-
-export interface HandballLeagueSeason {
-  season: number;
-  start: string;
-  end: string;
-  current: boolean;
-}
-
-export interface HandballLeagueResponse {
-  id: number;
-  name: string;
-  type: string;
-  logo: string | null;
-  country: HandballLeagueCountry;
-  seasons: HandballLeagueSeason[];
-}
-
-export interface HandballLeaguesParams {
-  id?: number;
-  name?: string;
-  country_id?: number;
-  country?: string;
-  type?: string;
-  season?: number;
-  search?: string;
-}
+export type {
+  HandballLeague,
+  HandballLeagueCountry,
+  HandballLeagueSeason,
+  HandballLeagueResponse,
+  HandballLeaguesParams,
+} from '@sudobility/heavymath_types';
 
 export interface HandballTeam {
   id: number;
