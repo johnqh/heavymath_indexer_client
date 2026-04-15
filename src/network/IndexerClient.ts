@@ -37,6 +37,7 @@ import type {
   MarketResolutionCheckError,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
+import { getNow, getTestMode } from '../utils/datetime';
 
 /**
  * Build a full URL by joining a base URL and path.
@@ -488,6 +489,7 @@ export class IndexerClient {
    */
   async checkMarketResolution(marketId: string): Promise<MarketResolutionCheck> {
     const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/resolve`);
+    const testMode = getTestMode();
 
     try {
       const response = await this.networkClient.get<MarketResolutionCheckSuccess>(url);
@@ -505,7 +507,7 @@ export class IndexerClient {
         error: {
           success: false,
           error: `Unexpected response (${response.status})`,
-          timestamp: new Date().toISOString(),
+          timestamp: getNow(testMode).toISOString(),
         },
       };
     } catch (error: unknown) {
@@ -520,7 +522,7 @@ export class IndexerClient {
           error: errorData ?? {
             success: false,
             error: `API Error (${networkError.status}): Failed to check market resolution`,
-            timestamp: new Date().toISOString(),
+            timestamp: getNow(testMode).toISOString(),
           },
         };
       }
