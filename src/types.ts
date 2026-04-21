@@ -382,7 +382,6 @@ export interface MarketCreatedEventData {
 export interface MarketResolvedEventData {
   marketId: string;
   resolution: string;
-  equilibrium: string;
   chainId: number;
 }
 
