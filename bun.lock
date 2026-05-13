@@ -5,7 +5,7 @@
     "": {
       "name": "@sudobility/heavymath_indexer_client",
       "devDependencies": {
-        "@sudobility/heavymath_types": "^0.0.27",
+        "@sudobility/heavymath_types": "^0.0.29",
         "@sudobility/types": "^1.9.62",
         "@tanstack/react-query": "^5.90.5",
         "@testing-library/dom": "^10.4.1",
@@ -31,7 +31,7 @@
         "zustand": "^5.0.0",
       },
       "peerDependencies": {
-        "@sudobility/heavymath_types": "^0.0.27",
+        "@sudobility/heavymath_types": "^0.0.29",
         "@sudobility/types": "^1.9.62",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -212,7 +212,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.0.0", "", {}, "sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA=="],
 
-    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.27", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-mBh0dFUnEziItDvw+0I5uzG6Ec9PSnu19K7eL1xtj1WWqihVMP5abuO0tYrswvV383YYuzaFLP3rUVeVyReEiw=="],
+    "@sudobility/heavymath_types": ["@sudobility/heavymath_types@0.0.29", "", { "peerDependencies": { "viem": "^2.0.0" }, "optionalPeers": ["viem"] }, "sha512-bc+NK1QdjeF77rDZ56vmo/kCib0fLCcYMDO6AEP//BPM26gIRCvBbUBFeyYvfeG17LzVjujwHQJWXeatPJAVkg=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.62", "", {}, "sha512-GOkz5oE7Fmlolba2aemBF2fKPtH4I2lHAjVta+fqZAoAV72DQaWYzVEjTwKZs/ACY/g9Z262IDa7lEh+IOrn7w=="],
 
