@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'heavymath-auth',
       storage: getAuthStorage(),
-      partialize: (state) => ({
+      partialize: state => ({
         token: state.token,
         address: state.address,
         expiresAt: state.expiresAt,

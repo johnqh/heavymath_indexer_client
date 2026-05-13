@@ -855,10 +855,7 @@ export class IndexerClient {
    * Verify a SIWE signature and get a JWT.
    * POST /api/auth/verify
    */
-  async verifySiwe(
-    message: string,
-    signature: string
-  ): Promise<ApiResponse<AuthVerifyResponse>> {
+  async verifySiwe(message: string, signature: string): Promise<ApiResponse<AuthVerifyResponse>> {
     const response = await this.networkClient.post<ApiResponse<AuthVerifyResponse>>(
       buildUrl(this.baseUrl, '/api/auth/verify'),
       { message, signature }
@@ -877,9 +874,7 @@ export class IndexerClient {
    * Get discussion metadata for a subject.
    * GET /api/discussions?subject_type=...&sport=...&subject_id=...
    */
-  async getDiscussion(
-    query: DiscussionQuery
-  ): Promise<ApiResponse<DiscussionData | null>> {
+  async getDiscussion(query: DiscussionQuery): Promise<ApiResponse<DiscussionData | null>> {
     const params = new URLSearchParams();
     params.append('subject_type', query.subjectType);
     params.append('sport', query.sport);
@@ -923,10 +918,7 @@ export class IndexerClient {
    * Post a comment to a discussion (creates discussion lazily if needed).
    * POST /api/discussions/comments
    */
-  async postComment(
-    token: string,
-    body: PostCommentRequest
-  ): Promise<ApiResponse<CommentData>> {
+  async postComment(token: string, body: PostCommentRequest): Promise<ApiResponse<CommentData>> {
     const response = await this.networkClient.post<ApiResponse<CommentData>>(
       buildUrl(this.baseUrl, '/api/discussions/comments'),
       body,
@@ -942,10 +934,7 @@ export class IndexerClient {
    * Soft-delete a comment (author or admin only).
    * DELETE /api/discussions/comments/:id
    */
-  async deleteComment(
-    token: string,
-    commentId: number
-  ): Promise<ApiResponse<{ message: string }>> {
+  async deleteComment(token: string, commentId: number): Promise<ApiResponse<{ message: string }>> {
     const response = await this.networkClient.delete<ApiResponse<{ message: string }>>(
       buildUrl(this.baseUrl, `/api/discussions/comments/${commentId}`),
       { headers: { Authorization: `Bearer ${token}` } }

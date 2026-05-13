@@ -35,7 +35,7 @@ export function useAuthVerify(client: IndexerClient) {
     }): Promise<ApiResponse<AuthVerifyResponse>> => {
       return await client.verifySiwe(message, signature);
     },
-    onSuccess: (response) => {
+    onSuccess: response => {
       if (response.data) {
         setSession(response.data.token, response.data.address, response.data.expiresAt);
       }
