@@ -73,6 +73,25 @@ export type {
   TriggerResolveResponseData,
   ApiInfoData,
   SportsHealthData,
+
+  // Discussion types
+  SubjectType,
+  ModerationStatus,
+  DiscussionData,
+  CommentData,
+  DiscussionCommentsResponse,
+  PostCommentRequest,
+  ModerateCommentRequest,
+  AuthNonceResponse,
+  AuthVerifyRequest,
+  AuthVerifyResponse,
+} from '@sudobility/heavymath_types';
+
+export {
+  SubjectTypeValues,
+  isSubjectType,
+  ModerationStatusValues,
+  isModerationStatus,
 } from '@sudobility/heavymath_types';
 
 // ============================================================================
@@ -217,6 +236,24 @@ export interface WalletFavoritesFilters {
 
 // FavoriteCountsFilters is re-exported from @sudobility/heavymath_types above
 
+/**
+ * Query parameters for the discussion comments endpoint (GET /api/discussions/:id/comments).
+ */
+export interface DiscussionCommentsFilters {
+  page?: number;
+  limit?: number;
+  sort?: 'newest' | 'oldest';
+}
+
+/**
+ * Query for looking up a discussion by its subject.
+ */
+export interface DiscussionQuery {
+  subjectType: string;
+  sport: string;
+  subjectId: string;
+}
+
 // ============================================================================
 // Oracle Resolution Types (re-exported from @sudobility/heavymath_types)
 // ============================================================================
@@ -275,7 +312,13 @@ export type MarketResolutionCheck =
 /**
  * SSE subscription channels
  */
-export type SubscriptionChannel = 'markets' | 'market' | 'predictions' | 'dealers' | 'oracle';
+export type SubscriptionChannel =
+  | 'markets'
+  | 'market'
+  | 'predictions'
+  | 'dealers'
+  | 'oracle'
+  | 'discussions';
 
 /**
  * SSE event types
@@ -295,7 +338,9 @@ export type SSEEventType =
   | 'LicenseTransferred'
   | 'PermissionsSet'
   | 'OracleRegistered'
-  | 'OracleDataUpdated';
+  | 'OracleDataUpdated'
+  | 'CommentAdded'
+  | 'CommentDeleted';
 
 /**
  * SSE subscription filters

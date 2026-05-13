@@ -28,3 +28,9 @@ export * from './useSSE';
 
 // Sports API proxy hooks
 export * from './sports';
+
+// Auth hooks
+export * from './useAuth';
+
+// Discussion hooks
+export * from './useDiscussions';

@@ -35,6 +35,14 @@ import type {
   MarketResolutionCheck,
   MarketResolutionCheckSuccess,
   MarketResolutionCheckError,
+  AuthNonceResponse,
+  AuthVerifyResponse,
+  DiscussionData,
+  CommentData,
+  DiscussionCommentsResponse,
+  PostCommentRequest,
+  DiscussionQuery,
+  DiscussionCommentsFilters,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 import { getNow, getTestMode } from '../utils/datetime';
@@ -822,6 +830,129 @@ export class IndexerClient {
       throw handleApiError(response, `get sports data (${sport}${endpoint})`);
     }
 
+    return response.data;
+  }
+
+  // =============================================================================
+  // AUTH ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get a SIWE nonce for signing.
+   * GET /api/auth/nonce
+   */
+  async getNonce(): Promise<ApiResponse<AuthNonceResponse>> {
+    const response = await this.networkClient.get<ApiResponse<AuthNonceResponse>>(
+      buildUrl(this.baseUrl, '/api/auth/nonce')
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get nonce');
+    }
+    return response.data;
+  }
+
+  /**
+   * Verify a SIWE signature and get a JWT.
+   * POST /api/auth/verify
+   */
+  async verifySiwe(
+    message: string,
+    signature: string
+  ): Promise<ApiResponse<AuthVerifyResponse>> {
+    const response = await this.networkClient.post<ApiResponse<AuthVerifyResponse>>(
+      buildUrl(this.baseUrl, '/api/auth/verify'),
+      { message, signature }
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'verify SIWE');
+    }
+    return response.data;
+  }
+
+  // =============================================================================
+  // DISCUSSION ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get discussion metadata for a subject.
+   * GET /api/discussions?subject_type=...&sport=...&subject_id=...
+   */
+  async getDiscussion(
+    query: DiscussionQuery
+  ): Promise<ApiResponse<DiscussionData | null>> {
+    const params = new URLSearchParams();
+    params.append('subject_type', query.subjectType);
+    params.append('sport', query.sport);
+    params.append('subject_id', query.subjectId);
+
+    const response = await this.networkClient.get<ApiResponse<DiscussionData | null>>(
+      buildUrl(this.baseUrl, `/api/discussions?${params.toString()}`)
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get discussion');
+    }
+    return response.data;
+  }
+
+  /**
+   * Get paginated, threaded comments for a discussion.
+   * GET /api/discussions/:id/comments
+   */
+  async getDiscussionComments(
+    discussionId: number,
+    filters?: DiscussionCommentsFilters
+  ): Promise<ApiResponse<DiscussionCommentsResponse>> {
+    const params = new URLSearchParams();
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.sort) params.append('sort', filters.sort);
+
+    const queryString = params.toString();
+    const path = `/api/discussions/${discussionId}/comments${queryString ? `?${queryString}` : ''}`;
+
+    const response = await this.networkClient.get<ApiResponse<DiscussionCommentsResponse>>(
+      buildUrl(this.baseUrl, path)
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get discussion comments');
+    }
+    return response.data;
+  }
+
+  /**
+   * Post a comment to a discussion (creates discussion lazily if needed).
+   * POST /api/discussions/comments
+   */
+  async postComment(
+    token: string,
+    body: PostCommentRequest
+  ): Promise<ApiResponse<CommentData>> {
+    const response = await this.networkClient.post<ApiResponse<CommentData>>(
+      buildUrl(this.baseUrl, '/api/discussions/comments'),
+      body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'post comment');
+    }
+    return response.data;
+  }
+
+  /**
+   * Soft-delete a comment (author or admin only).
+   * DELETE /api/discussions/comments/:id
+   */
+  async deleteComment(
+    token: string,
+    commentId: number
+  ): Promise<ApiResponse<{ message: string }>> {
+    const response = await this.networkClient.delete<ApiResponse<{ message: string }>>(
+      buildUrl(this.baseUrl, `/api/discussions/comments/${commentId}`),
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'delete comment');
+    }
     return response.data;
   }
 }
