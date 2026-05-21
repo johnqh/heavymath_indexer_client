@@ -86,8 +86,8 @@ function handleApiError(
  * Requires a `NetworkClient` instance (from `@sudobility/di`) for HTTP transport.
  */
 export class IndexerClient {
-  protected readonly baseUrl: string;
-  protected readonly networkClient: NetworkClient;
+  private readonly baseUrl: string;
+  private readonly networkClient: NetworkClient;
 
   /**
    * Create an IndexerClient instance
