@@ -43,6 +43,7 @@ import type {
   PostCommentRequest,
   DiscussionQuery,
   DiscussionCommentsFilters,
+  StadiumData,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 import { getNow, getTestMode } from '../utils/datetime';
@@ -943,5 +944,41 @@ export class IndexerClient {
       throw handleApiError(response, 'delete comment');
     }
     return response.data;
+  }
+
+  // =============================================================================
+  // STADIUM ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get all World Cup 2026 stadiums.
+   * GET /api/stadiums
+   */
+  async getStadiums(): Promise<StadiumData[]> {
+    const response = await this.networkClient.get<ApiResponse<StadiumData[]>>(
+      buildUrl(this.baseUrl, '/api/stadiums')
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get stadiums');
+    }
+
+    return response.data.data!;
+  }
+
+  /**
+   * Get a single stadium by ID.
+   * GET /api/stadiums/:id
+   */
+  async getStadium(id: number): Promise<StadiumData> {
+    const response = await this.networkClient.get<ApiResponse<StadiumData>>(
+      buildUrl(this.baseUrl, `/api/stadiums/${id}`)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get stadium');
+    }
+
+    return response.data.data!;
   }
 }

@@ -34,3 +34,6 @@ export * from './useAuth';
 
 // Discussion hooks
 export * from './useDiscussions';
+
+// Stadium hooks
+export * from './useStadiums';

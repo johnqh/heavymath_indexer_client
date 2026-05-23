@@ -73,6 +73,7 @@ export type {
   TriggerResolveResponseData,
   ApiInfoData,
   SportsHealthData,
+  StadiumData,
 
   // Discussion types
   SubjectType,
