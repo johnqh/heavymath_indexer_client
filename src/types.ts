@@ -155,6 +155,8 @@ export interface MarketFilters {
   dealer?: string;
   /** Filter by market category string (e.g., 'sports', 'crypto'). */
   category?: string;
+  /** Filter by oracle ID (bytes32 hex string). */
+  oracleId?: string;
   /** Maximum number of results to return. Defaults to 50 on the server. */
   limit?: number;
   /** Number of results to skip for pagination. Defaults to 0. */

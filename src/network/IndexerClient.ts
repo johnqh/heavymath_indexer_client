@@ -120,6 +120,7 @@ export class IndexerClient {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.dealer) params.append('dealer', filters.dealer);
     if (filters?.category) params.append('category', filters.category);
+    if (filters?.oracleId) params.append('oracle_id', filters.oracleId);
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.offset) params.append('offset', filters.offset.toString());
 
