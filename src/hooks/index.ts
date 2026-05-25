@@ -37,3 +37,6 @@ export * from './useDiscussions';
 
 // Stadium hooks
 export * from './useStadiums';
+
+// Leaderboard hooks
+export * from './useLeaderboard';

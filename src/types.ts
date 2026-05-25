@@ -442,6 +442,48 @@ export interface PredictionPlacedEventData {
   chainId: number;
 }
 
+// ============================================================================
+// Leaderboard Types
+// ============================================================================
+
+/**
+ * A single entry in the wallet leaderboard.
+ */
+export interface LeaderboardEntry {
+  rank: number;
+  userAddress: string;
+  totalStaked: string;
+  totalWinnings: string;
+  totalRefunds: string;
+  netProfit: string;
+  totalBets: number;
+  activeBets: number;
+}
+
+/**
+ * Query parameters for the leaderboard endpoint (GET /api/wallets/leaderboard).
+ */
+export interface LeaderboardFilters {
+  /** Sort field. Defaults to 'net_profit'. */
+  sortBy?: 'net_profit' | 'total_staked' | 'total_winnings';
+  /** Filter by chain ID. */
+  chainId?: number;
+  /** Maximum number of results to return. Defaults to 20 on the server. */
+  limit?: number;
+  /** Number of results to skip for pagination. Defaults to 0. */
+  offset?: number;
+}
+
+/**
+ * Response shape for the leaderboard endpoint.
+ */
+export interface LeaderboardResponse {
+  data: LeaderboardEntry[];
+  count: number;
+  limit: number;
+  offset: number;
+}
+
 /**
  * Prediction updated event data
  */

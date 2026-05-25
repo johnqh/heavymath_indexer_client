@@ -44,6 +44,8 @@ import type {
   DiscussionQuery,
   DiscussionCommentsFilters,
   StadiumData,
+  LeaderboardFilters,
+  LeaderboardResponse,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
 import { getNow, getTestMode } from '../utils/datetime';
@@ -980,5 +982,37 @@ export class IndexerClient {
     }
 
     return response.data.data!;
+  }
+
+  // =============================================================================
+  // LEADERBOARD ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get the wallet leaderboard.
+   * GET /api/wallets/leaderboard
+   *
+   * @param filters - Optional filters for sorting, pagination, and chain
+   * @returns Leaderboard entries with pagination info
+   * @throws Error if the request fails
+   */
+  async getLeaderboard(filters?: LeaderboardFilters): Promise<LeaderboardResponse> {
+    const params = new URLSearchParams();
+    if (filters?.sortBy) params.append('sort_by', filters.sortBy);
+    if (filters?.chainId != null) params.append('chain_id', String(filters.chainId));
+    if (filters?.limit != null) params.append('limit', String(filters.limit));
+    if (filters?.offset != null) params.append('offset', String(filters.offset));
+
+    const queryString = params.toString();
+    const path = `/api/wallets/leaderboard${queryString ? `?${queryString}` : ''}`;
+    const response = await this.networkClient.get<LeaderboardResponse>(
+      buildUrl(this.baseUrl, path)
+    );
+
+    if (!response.ok || !response.data) {
+      throw handleApiError(response, 'get leaderboard');
+    }
+
+    return response.data;
   }
 }
