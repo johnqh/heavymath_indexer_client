@@ -454,6 +454,7 @@ export interface PredictionPlacedEventData {
 export interface LeaderboardEntry {
   rank: number;
   userAddress: string;
+  displayName: string;
   totalStaked: string;
   totalWinnings: string;
   totalRefunds: string;

@@ -6,7 +6,7 @@ This guide helps you work efficiently with Claude Code on the Heavymath Indexer 
 
 React and React Native compatible client library for the Heavymath prediction market indexer API. Provides a four-layer architecture (hooks -> stores -> business -> network) with React Query integration, Zustand stores for optimistic updates, and SSE real-time subscriptions.
 
-- **Version**: 0.0.14
+- **Version**: 0.0.55
 - **Package**: `@sudobility/heavymath_indexer_client`
 - **License**: BUSL-1.1
 - **Stack**: TypeScript 5.9.3, React Query 5.90, Zustand 5, Vitest 4.0
@@ -74,10 +74,15 @@ heavymath_indexer_client/
 │   │   ├── useOracle.ts         # Oracle request hooks
 │   │   ├── useStats.ts          # Statistics hooks
 │   │   ├── useFavorites.ts      # Wallet favorites hooks (optimistic updates via Zustand)
+│   │   ├── useAuth.ts           # Auth hooks (nonce, SIWE verify, session)
+│   │   ├── useDiscussions.ts    # Discussion/comment hooks
+│   │   ├── useLeaderboard.ts    # Leaderboard hooks
+│   │   ├── useStadiums.ts       # Stadium data hooks
 │   │   └── useSSE.ts            # Server-Sent Events hooks for real-time updates
 │   ├── stores/                  # Zustand state stores
 │   │   ├── index.ts             # Store exports
-│   │   └── favorites-store.ts   # Favorites store with persistence and optimistic updates
+│   │   ├── favorites-store.ts   # Favorites store with persistence and optimistic updates
+│   │   └── auth-store.ts        # Auth store (JWT token + wallet address persistence)
 │   └── __tests__/               # Test files
 │       └── index.test.ts        # Smoke tests
 ├── package.json                 # Dependencies and scripts
@@ -114,9 +119,9 @@ heavymath_indexer_client/
                           ▼
 ┌─────────────────────────────────────────────────────┐
 │                  Zustand Stores                      │
-│  (useFavoritesStore)                                 │
+│  (useFavoritesStore, useAuthStore)                   │
 │  Local persistence with optimistic updates           │
-│  Used by favorites hooks for offline-first UX        │
+│  Used by favorites/auth hooks for offline-first UX   │
 └─────────────────────────────────────────────────────┘
                           │
                           ▼
@@ -187,6 +192,15 @@ The client covers all REST endpoints from `heavymath_indexer`:
 | `/api/wallet/:address/favorites/:id` | DELETE | Remove favorite |
 | `/api/stats/markets` | GET | Get market statistics |
 | `/api/health` | GET | Health check |
+| `/api/auth/nonce` | GET | Get nonce for SIWE authentication |
+| `/api/auth/verify` | POST | Verify SIWE signature |
+| `/api/discussions/:id` | GET | Get discussion for a market |
+| `/api/discussions/:id/comments` | GET | Get comments for a discussion |
+| `/api/discussions/:id/comments` | POST | Post a comment |
+| `/api/discussions/:id/comments/:commentId` | DELETE | Delete a comment |
+| `/api/stadiums` | GET | List stadiums |
+| `/api/stadiums/:id` | GET | Get stadium by ID |
+| `/api/leaderboard` | GET | Get leaderboard data |
 | `/api/events` | SSE | Server-Sent Events stream |
 
 ## Zustand Stores
@@ -218,6 +232,15 @@ The favorites store provides local persistence and optimistic updates for wallet
 | `clearFavorites(walletAddress)` | Clear one wallet's favorites |
 | `clearAll()` | Clear all favorites data |
 | `needsRefresh(walletAddress, maxAge?)` | Check if data is stale |
+
+### Auth Store (`src/stores/auth-store.ts`)
+
+The auth store manages JWT token and wallet address persistence using Zustand with the `persist` middleware.
+
+**Key features:**
+- Persists to `localStorage` under the key `heavymath-auth`
+- Stores JWT token and associated wallet address
+- Used by auth hooks for SIWE (Sign-In with Ethereum) authentication flow
 
 ## Server-Sent Events (SSE)
 
@@ -465,9 +488,11 @@ queryKey: ['heavymath', 'favorites', walletAddress, filters]
 ```
 
 ### Stale Time Guidelines
+- Sports data: 30 seconds
 - Fast-changing data (predictions, oracle requests, health): 1 minute
-- Normal data (markets, dealers, withdrawals): 2 minutes
-- Slow-changing data (history, stats, dealer NFTs, permissions): 5-10 minutes
+- Normal data (markets, withdrawals): 2 minutes
+- Slow-changing data (dealers, favorites, stats, leaderboard): 5 minutes
+- Static data (stadiums): 24 hours
 
 ### Error Handling
 ```typescript
@@ -558,8 +583,8 @@ The project uses a reusable GitHub Actions workflow defined in `.github/workflow
 ### Peer Dependencies (required by consumer)
 - `react` >=18.0.0
 - `@tanstack/react-query` >=5.0.0
-- `@sudobility/types` ^1.9.53 - Provides `NetworkClient`, `ApiResponse`, etc.
-- `@sudobility/heavymath_types` ^0.0.8 - Provides domain types
+- `@sudobility/types` ^1.9.62 - Provides `NetworkClient`, `ApiResponse`, etc.
+- `@sudobility/heavymath_types` ^0.0.31 - Provides domain types
 - `zustand` ^5.0.0 - Used by favorites store for local persistence
 
 ### Runtime Dependencies
@@ -657,28 +682,40 @@ The business layer uses an in-memory `Map` for caching with a configurable TTL (
 ### Available Hooks by Category
 
 ```typescript
-// Markets
+// Markets (stale: 2 min)
 useMarkets, useActiveMarkets, useMarket, useMarketPredictions, useMarketHistory, useMarketDetails
 
-// Predictions
+// Predictions (stale: 1 min)
 usePredictions, useUserPredictions, useActiveBets, usePastBets, usePrediction, useUserBettingHistory
 
-// Dealers
+// Dealers (stale: 5 min)
 useDealers, useIsDealer, useDealerNFTs, useDealer, useDealerPermissions, useDealerMarkets, useDealerDashboard
 
-// Withdrawals
+// Withdrawals (stale: 2 min)
 useWithdrawals, useDealerWithdrawals, useSystemWithdrawals, useMarketWithdrawals
 
-// Oracle
+// Oracle (stale: 1-2 min)
 useOracleRequests, useOracleRequest, useMarketOracle, useTimedOutOracleRequests, usePendingOracleRequests
 
-// Favorites (with Zustand optimistic updates)
+// Favorites (stale: 5 min, with Zustand optimistic updates)
 useFavorites, useCategoryFavorites, useIsFavorite, useFavoritesStoreHook
+
+// Auth (SIWE authentication flow)
+useAuthNonce, useAuthVerify, useAuthSession
+
+// Discussions (comments on markets)
+useDiscussion, useDiscussionComments, usePostComment, useDeleteComment, useModerateComment
+
+// Stadiums (stale: 24 hours)
+useStadiums, useStadium
+
+// Leaderboard (stale: 5 min)
+useLeaderboard
 
 // SSE (real-time)
 useSSE, useMarketUpdates, useAllMarketUpdates, useUserPredictionUpdates
 
-// Stats
+// Stats (stale: 5 min)
 useMarketStats, useHealth
 ```
 
@@ -716,8 +753,8 @@ import type {
   SSEDataUpdateMessage, UseSSEOptions, UseSSEReturn,
 } from '@heavymath/indexer_client';
 
-// Zustand store
-import { useFavoritesStore } from '@heavymath/indexer_client';
+// Zustand stores
+import { useFavoritesStore, useAuthStore } from '@heavymath/indexer_client';
 import type { FavoritesState } from '@heavymath/indexer_client';
 ```
 
@@ -750,6 +787,15 @@ heavymath_app        (consumes everything)
 - `getDealers()` → `GET /api/dealers/list`
 - `getFavorites()` → `GET /api/wallet/:address/favorites`
 - `getSportsData()` → `GET /api/sports/:sport/*` (proxy to api-sports.io)
+- `getNonce()` → `GET /api/auth/nonce`
+- `verifySiwe()` → `POST /api/auth/verify`
+- `getDiscussion(id)` → `GET /api/discussions/:id`
+- `getDiscussionComments(id)` → `GET /api/discussions/:id/comments`
+- `postComment(id, ...)` → `POST /api/discussions/:id/comments`
+- `deleteComment(id, commentId)` → `DELETE /api/discussions/:id/comments/:commentId`
+- `getStadiums()` → `GET /api/stadiums`
+- `getStadium(id)` → `GET /api/stadiums/:id`
+- `getLeaderboard()` → `GET /api/leaderboard`
 - SSE: `useSSE()` connects to `GET /api/events` endpoint
 
 When the indexer adds/changes endpoints, the corresponding `IndexerClient` method and React hook must be updated here.
