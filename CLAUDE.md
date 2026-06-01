@@ -6,7 +6,7 @@ This guide helps you work efficiently with Claude Code on the Heavymath Indexer 
 
 React and React Native compatible client library for the Heavymath prediction market indexer API. Provides a four-layer architecture (hooks -> stores -> business -> network) with React Query integration, Zustand stores for optimistic updates, and SSE real-time subscriptions.
 
-- **Version**: 0.0.55
+- **Version**: 0.0.56
 - **Package**: `@sudobility/heavymath_indexer_client`
 - **License**: BUSL-1.1
 - **Stack**: TypeScript 5.9.3, React Query 5.90, Zustand 5, Vitest 4.0
@@ -198,6 +198,14 @@ The client covers all REST endpoints from `heavymath_indexer`:
 | `/api/discussions/:id/comments` | GET | Get comments for a discussion |
 | `/api/discussions/:id/comments` | POST | Post a comment |
 | `/api/discussions/:id/comments/:commentId` | DELETE | Delete a comment |
+| `/api/markets/:id/oracle-config` | POST | Set market oracle resolution config |
+| `/api/markets/:id/oracle-config` | GET | Get market oracle config |
+| `/api/markets/:id/resolve` | GET | Pre-check market resolution status |
+| `/api/markets/:id/trigger-lock` | POST | Trigger market lock via resolver |
+| `/api/markets/:id/trigger-resolve` | POST | Trigger market resolve via resolver |
+| `/api/favorites/counts` | GET | Get favorite counts (aggregated) |
+| `/api/sports/search` | GET | Cross-sport search |
+| `/api/sports/:sport/*` | GET | Sports data proxy |
 | `/api/stadiums` | GET | List stadiums |
 | `/api/stadiums/:id` | GET | Get stadium by ID |
 | `/api/leaderboard` | GET | Get leaderboard data |
@@ -584,7 +592,7 @@ The project uses a reusable GitHub Actions workflow defined in `.github/workflow
 - `react` >=18.0.0
 - `@tanstack/react-query` >=5.0.0
 - `@sudobility/types` ^1.9.62 - Provides `NetworkClient`, `ApiResponse`, etc.
-- `@sudobility/heavymath_types` ^0.0.31 - Provides domain types
+- `@sudobility/heavymath_types` ^0.0.32 - Provides domain types
 - `zustand` ^5.0.0 - Used by favorites store for local persistence
 
 ### Runtime Dependencies
@@ -704,7 +712,7 @@ useFavorites, useCategoryFavorites, useIsFavorite, useFavoritesStoreHook
 useAuthNonce, useAuthVerify, useAuthSession
 
 // Discussions (comments on markets)
-useDiscussion, useDiscussionComments, usePostComment, useDeleteComment, useModerateComment
+useDiscussion, useDiscussionComments, usePostComment, useDeleteComment
 
 // Stadiums (stale: 24 hours)
 useStadiums, useStadium
