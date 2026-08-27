@@ -1,5 +1,10 @@
 # Claude Code Workflows for Heavymath Indexer Client
 
+> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
+> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
+> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
+> finishing a task is not permission to commit it.
+
 This guide helps you work efficiently with Claude Code on the Heavymath Indexer Client library.
 
 ## Project Overview
@@ -821,3 +826,7 @@ The `IndexerClient` constructor takes a `NetworkClient` (from `@sudobility/types
 - **Tests**: Mock `NetworkClient` with `vi.fn()` implementations
 
 The `NetworkClient` interface requires: `get<T>(url, options?)`, `post<T>(url, body, options?)`, `put<T>(url, body, options?)`, `delete<T>(url, options?)` — all returning `Promise<NetworkResponse<T>>`.
+
+## Git Workflow
+
+- Do not use feature branches for code changes. Always stay on the current branch.
