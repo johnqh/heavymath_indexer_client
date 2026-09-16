@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/heavymath_indexer_client",
-  "version": "0.0.61",
+  "version": "0.0.62",
   "description": "React and React Native compatible client library for Heavymath prediction market indexer API with TypeScript support",
   "type": "module",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
     "build:watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "bun run clean && bun run build",
-    "test": "vitest",
+    "test:unit": "vitest run",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
@@ -28,7 +28,7 @@
     "format:check": "prettier --check src/**/*.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
-    "check-all": "bun run lint && bun run typecheck && bun run test:run"
+    "check-all": "bun run lint && bun run typecheck && bun run test:unit"
   },
   "keywords": [
     "indexer",
@@ -42,14 +42,14 @@
   "author": "John Huang",
   "license": "BUSL-1.1",
   "peerDependencies": {
-    "@sudobility/heavymath_types": "^0.0.35",
+    "@sudobility/heavymath_types": "^0.0.36",
     "@sudobility/types": "^1.9.67",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18.0.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "@sudobility/heavymath_types": "^0.0.35",
+    "@sudobility/heavymath_types": "^0.0.36",
     "@sudobility/types": "^1.9.67",
     "@tanstack/react-query": "^5.90.5",
     "@testing-library/dom": "^10.4.1",
