@@ -48,7 +48,7 @@ import type {
   LeaderboardResponse,
 } from '../types';
 import type { SportsApiResponse, SportsQueryParams, SportsSearchResponse } from '../types/sports';
-import { getNow, getTestMode } from '../utils/datetime';
+import { getNow } from '../utils/datetime';
 
 /**
  * Build a full URL by joining a base URL and path.
@@ -91,15 +91,21 @@ function handleApiError(
 export class IndexerClient {
   private readonly baseUrl: string;
   private readonly networkClient: NetworkClient;
+  /** Whether timestamps this client makes up are the fixed test-mode time. */
+  readonly testMode: boolean;
 
   /**
    * Create an IndexerClient instance
    * @param endpointUrl - The base URL for the indexer API
    * @param networkClient - A NetworkClient instance from @sudobility/di
+   * @param testMode - Stamp client-made responses with the fixed test-mode
+   *   time. The app decides, from its own configuration; this library reads
+   *   no environment. Same third argument as mail_box_indexer_client's.
    */
-  constructor(endpointUrl: string, networkClient: NetworkClient) {
+  constructor(endpointUrl: string, networkClient: NetworkClient, testMode = false) {
     this.baseUrl = endpointUrl;
     this.networkClient = networkClient;
+    this.testMode = testMode;
   }
 
   // =============================================================================
@@ -501,7 +507,7 @@ export class IndexerClient {
    */
   async checkMarketResolution(marketId: string): Promise<MarketResolutionCheck> {
     const url = buildUrl(this.baseUrl, `/api/markets/${encodeURIComponent(marketId)}/resolve`);
-    const testMode = getTestMode();
+    const testMode = this.testMode;
 
     try {
       const response = await this.networkClient.get<MarketResolutionCheckSuccess>(url);

@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import { IndexerClient } from '../network/IndexerClient';
 import { useFavoritesStore } from '../stores/favorites-store';
-import { getNow, getTestMode } from '../utils/datetime';
+import { getNow } from '../utils/datetime';
 
 /**
  * Hook for managing wallet favorites
@@ -90,7 +90,7 @@ export function useFavorites(
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      const testMode = getTestMode();
+      const testMode = client.testMode;
       if (!walletAddress) {
         return {
           success: true,

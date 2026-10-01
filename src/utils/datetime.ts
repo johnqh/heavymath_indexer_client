@@ -1,35 +1,14 @@
 import { getCurrentDatetime } from '@sudobility/heavymath_types';
 
-type EnvMap = Record<string, string | undefined>;
-
-function getImportMetaEnv(): EnvMap | undefined {
-  return (import.meta as ImportMeta & { env?: EnvMap }).env;
-}
-
-function getEnvValue(key: string): string | undefined {
-  const importMetaValue = getImportMetaEnv()?.[key];
-  if (importMetaValue !== undefined && importMetaValue !== '') {
-    return importMetaValue;
-  }
-
-  if (typeof process !== 'undefined') {
-    const processValue = process.env?.[key];
-    if (processValue !== undefined && processValue !== '') {
-      return processValue;
-    }
-  }
-
-  return undefined;
-}
-
-export function getTestMode(): boolean {
-  const value = getEnvValue('TEST_MODE') ?? getEnvValue('VITE_TEST_MODE');
-  if (!value) return false;
-
-  const normalizedValue = value.toLowerCase().trim();
-  return ['true', 'yes', '1', 'on'].includes(normalizedValue);
-}
-
-export function getNow(testMode = getTestMode()): Date {
+/**
+ * The current time, or the fixed test-mode time when `testMode` is set.
+ *
+ * Test mode is the caller's to say — `IndexerClient` takes it as a
+ * constructor argument, as `mail_box_indexer_client`'s does. A library reads
+ * no environment: `import.meta.env` and `process.env` mean different things
+ * under Vite, Node and Metro (Hermes cannot even compile `import.meta`), and
+ * which variable decides is the app's choice, not this package's.
+ */
+export function getNow(testMode = false): Date {
   return getCurrentDatetime(testMode);
 }
